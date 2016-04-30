@@ -10,13 +10,23 @@
                            :e '(1 2 3)}
                     :expansion #{}}))
 
-(defn emit [event args]
+(defn emit [event & args]
   (prn "Emit: " event args)
   (case event
-    :expand (swap! store update :expansion conj args)
-    :contract (swap! store update :expansion disj args)))
+    :expand (swap! store update :expansion conj (first args))
+    :contract (swap! store update :expansion disj (first args))
+    :collapse-all (swap! store assoc :expansion #{})
+    ))
 
 (declare DataDrill)
+
+(defn ExpandButton [{:keys [expanded? path]}]
+  (if expanded?
+    [:button {:onClick #(emit :contract path)} "-"]
+    [:button {:onClick #(emit :expand path)} "+"]))
+
+(defn CollapseAllButton []
+  [:button {:onClick #(emit :collapse-all)} "Collapse all"])
 
 (defn Node [{:keys [data path]}]
   [:div (if (string? data)
@@ -31,11 +41,6 @@
     [DataDrill {:data v
                 :path (conj path k)
                 :expansion expansion}]]])
-
-(defn ExpandButton [{:keys [expanded? path]}]
-  (if expanded?
-    [:button {:onClick #(emit :contract path)} "-"]
-    [:button {:onClick #(emit :expand path)} "+"]))
 
 (defn ListVecNode [{:keys [data path expansion]}]
   (let [expanded? (get expansion path)]
@@ -78,7 +83,8 @@
 (defn App []
   (let [{:keys [data expansion]} @store]
     [:div
-     (str expansion)
+     [:div (str expansion)]
+     [CollapseAllButton]
      [DataDrill {:data data
                  :path []
                  :expansion expansion}]]))
