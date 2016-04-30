@@ -6,3 +6,5 @@ figwheel_server.log
 
 target
 todo.txt
+
+resources/public/js

@@ -48,34 +48,35 @@
 
 (defn ListVecNode [{:keys [data path expansion]}]
   (let [expanded? (get expansion path)]
-    [:div
-     [ExpandButton {:expanded? expanded? :path path}]
-     [:span (if (list? data) "(" "[")]
-     (if expanded?
-       (map-indexed (fn [i x] ^{:key i} [DataDrill {:data x :path (conj path i) :expansion expansion}]) data)
-       (str (count data) " items"))
-     [:span (if (list? data) ")" "]")]]))
+    [:div {:style {:display "flex"}}
+     [:div {:style {:flex 0}} [ExpandButton {:expanded? expanded? :path path}]]
+     [:div {:style {:flex 1}} [:span (if (list? data) "(" "[")]
+      (if expanded?
+        (map-indexed (fn [i x] ^{:key i} [DataDrill {:data x :path (conj path i) :expansion expansion}]) data)
+        (str (count data) " items"))
+      [:span (if (list? data) ")" "]")]]]))
 
 (defn SetNode [{:keys [data path expansion]}]
   (let [expanded? (get expansion path)]
-    [:div
-     [ExpandButton {:expanded? expanded? :path path}]
-     [:span "#{"]
-     (if expanded?
-       (map-indexed (fn [i x] ^{:key i} [DataDrill {:data x :path (conj path x)} :expansion expansion]) data)
-       (str (count data) " items")
-       )
-     [:span "}"]]))
+    [:div {:style {:display "flex"}}
+     [:div {:style {:flex 0}} [ExpandButton {:expanded? expanded? :path path}]]
+     [:div {:style {:flex 1}} [:span "#{"]
+      (if expanded?
+        (map-indexed (fn [i x] ^{:key i} [DataDrill {:data x :path (conj path x)} :expansion expansion]) data)
+        (str (count data) " items"))
+      [:span "}"]]]))
 
 (defn MapNode [{:keys [data path expansion]}]
   (let [expanded? (get expansion path)]
-    [:div
-     [ExpandButton {:expanded? expanded? :path path}]
-     [:span "{"]
-     (if expanded?
-       (map-indexed (fn [i x] ^{:key i} [KeyValNode {:data x :path path :expansion expansion}]) data)
-       (clojure.string/join " " (keys data)))
-     [:span "}"]]))
+    [:div {:style {:display "flex"}}
+     [:div {:style {:flex 0}}
+      [ExpandButton {:expanded? expanded? :path path}]]
+     [:div {:style {:flex 1}}
+      [:span "{"]
+      (if expanded?
+        (map-indexed (fn [i x] ^{:key i} [KeyValNode {:data x :path path :expansion expansion}]) data)
+        (clojure.string/join " " (keys data)))
+      [:span "}"]]]))
 
 (defn DataDrill [{:keys [data] :as all}]
   (cond (map? data) [MapNode all]
