@@ -4,10 +4,11 @@
 (enable-console-print!)
 
 (def store (r/atom {:data {:a "a"
-                         :b [1 2 3 3 {:a "a" :b "b"}]
-                         :c "c"
-                         :d {:x "x" :y "y" :z [1 2 3 4]}}
-                  :expansion #{}}))
+                           :b [1 2 3 3 {:a "a" :b "b"}]
+                           :c #{1 2 3}
+                           :d {:x "x" :y "y" :z [1 2 3 4]}
+                           :e '(1 2 3)}
+                    :expansion #{}}))
 
 (defn emit [event args]
   (prn "Emit: " event args)
@@ -36,19 +37,28 @@
     [:button {:onClick #(emit :contract path)} "-"]
     [:button {:onClick #(emit :expand path)} "+"]))
 
-(defn VecNode [{:keys [data path expansion]}]
+(defn ListVecNode [{:keys [data path expansion]}]
   (let [expanded? (get expansion path)]
     [:div
      [ExpandButton {:expanded? expanded? :path path}]
-     [:span "["]
+     [:span (if (list? data) "(" "[")]
      (if expanded?
        (map-indexed (fn [i x] ^{:key i} [DataDrill {:data x :path (conj path i) :expansion expansion}]) data)
-       (str (count data))
+       (str (count data) " items"))
+     [:span (if (list? data) ")" "]")]]))
+
+(defn SetNode [{:keys [data path expansion]}]
+  (let [expanded? (get expansion path)]
+    [:div
+     [ExpandButton {:expanded? expanded? :path path}]
+     [:span "#{"]
+     (if expanded?
+       (map-indexed (fn [i x] ^{:key i} [DataDrill {:data x :path (conj path x)} :expansion expansion]) data)
+       (str (count data) " items")
        )
-     [:span "]"]]))
+     [:span "}"]]))
 
 (defn MapNode [{:keys [data path expansion]}]
-  (prn "Mapnode: " data "path: " path "expan: " expansion)
   (let [expanded? (get expansion path)]
     [:div
      [ExpandButton {:expanded? expanded? :path path}]
@@ -61,7 +71,8 @@
 
 (defn DataDrill [{:keys [data] :as all}]
   (cond (map? data) [MapNode all]
-        (vector? data) [VecNode all]
+        (set? data) [SetNode all]
+        (or (vector? data) (list? data)) [ListVecNode all]
         :else [Node all]))
 
 (defn App []
