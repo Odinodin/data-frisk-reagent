@@ -113,14 +113,14 @@
 
 (defn DataDrillShellVisibleButton [visible? toggle-visible-fn]
   (if visible?
-    [:div {:style {:overflow "hidden"}}
-     [:div {:onClick toggle-visible-fn
-            :style {:backgroundColor "#4EE24E"
-                    :padding "12px"
-                    :float "right"
-                    :width "80px"
-                    :text-align "center"}}
-      "Hide"]]
+    [:div {:onClick toggle-visible-fn
+           :style {:backgroundColor "#4EE24E"
+                   :padding "12px"
+                   :position "fixed"
+                   :right 0
+                   :width "80px"
+                   :text-align "center"}}
+     "Hide"]
     [:div {:onClick toggle-visible-fn
            :style {:backgroundColor "#4EE24E"
                    :padding "12px"
@@ -146,6 +146,7 @@
      [DataDrillShellVisibleButton visible? (fn [_] (swap! data-atom assoc-in [:data-drill :visible?] (not visible?)))]
      [:div {:style {:padding "10px"
                     :height "100%"
+                    :box-sizing "border-box"
                     :overflow-y "scroll"}}
       [Root data-atom]]]))
 
