@@ -8,15 +8,14 @@
                            :c #{1 2 3}
                            :d {:x "x" :y "y" :z [1 2 3 4]}
                            :e '(1 2 3)}
-                    :expansion #{}}))
+                    :data-drill {:expansion #{}}}))
 
 (defn emit [event & args]
   (prn "Emit: " event args)
   (case event
-    :expand (swap! store update :expansion conj (first args))
-    :contract (swap! store update :expansion disj (first args))
-    :collapse-all (swap! store assoc :expansion #{})
-    ))
+    :expand (swap! store update-in [:data-drill :expansion] conj (first args))
+    :contract (swap! store update-in [:data-drill :expansion] disj (first args))
+    :collapse-all (swap! store assoc-in [:data-drill :expansion] #{})))
 
 (declare DataDrill)
 
@@ -71,7 +70,6 @@
      (if expanded?
        (map-indexed (fn [i x] ^{:key i} [KeyValNode {:data x :path path :expansion expansion}]) data)
        (clojure.string/join " " (keys data)))
-
      [:span "}"]]))
 
 (defn DataDrill [{:keys [data] :as all}]
@@ -80,18 +78,19 @@
         (or (vector? data) (list? data)) [ListVecNode all]
         :else [Node all]))
 
-(defn App []
-  (let [{:keys [data expansion]} @store]
+(defn Root [data-atom]
+  (let [data-drill (:data-drill @data-atom)
+        raw (dissoc @data-atom :data-drill)]
     [:div
-     [:div (str expansion)]
+     [:div (str data-drill)]
      [CollapseAllButton]
-     [DataDrill {:data data
+     [DataDrill {:data raw
                  :path []
-                 :expansion expansion}]]))
+                 :expansion (:expansion data-drill)}]]))
 
 (defn mount-root []
   (r/render
-    [App]
+    [Root store]
     (js/document.getElementById "app")))
 
 (defn ^:export main []
