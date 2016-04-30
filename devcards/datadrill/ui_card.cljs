@@ -7,6 +7,7 @@
 (defcard-rg root
   Root
   (r/atom {:data-drill {:expansion #{[]}}
-           :data "ape" :b "c"})
+           :data "ape" :b "c"
+           :c :d})
   {:inspect-data true})
 

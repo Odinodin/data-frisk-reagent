@@ -28,8 +28,13 @@
   [:button {:onClick #(emit :collapse-all)} "Collapse all"])
 
 (defn Node [{:keys [data path]}]
-  [:div (if (string? data)
+  [:div (cond
+          (string? data)
           (str "'" data "'")
+
+          (keyword? data)
+          (str data)
+          :else
           data)])
 
 (defn KeyValNode [{[k v] :data path :path expansion :expansion}]
