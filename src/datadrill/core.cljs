@@ -94,9 +94,47 @@
                  :path []
                  :expansion (:expansion data-drill)}]]))
 
+(defn DataDrillShellVisibleButton [visible? toggle-visible-fn]
+  (if visible?
+    [:div {:style {:overflow "hidden"}}
+     [:div {:onClick toggle-visible-fn
+            :style {:backgroundColor "#4EE24E"
+                    :padding "12px"
+                    :float "right"
+                    :width "80px"
+                    :text-align "center"}}
+      "Hide"]]
+    [:div {:onClick toggle-visible-fn
+           :style {:backgroundColor "#4EE24E"
+                   :padding "12px"
+                   :position "fixed"
+                   :bottom 0
+                   :right 0
+                   :width "80px"
+                   :text-align "center"}}
+     "Data drill"]))
+
+(defn DataDrillShell [data-atom]
+  (let [data-drill (:data-drill @data-atom)
+        visible? (:visible? data-drill)]
+    (if visible?
+      [:div {:style {:backgroundColor "#EEFFED"
+                     :position "fixed"
+                     :right 0
+                     :bottom 0
+                     :width "100%"
+                     :height "50%"
+                     :padding 0}}
+       [DataDrillShellVisibleButton visible? (fn [_] (swap! data-atom assoc-in [:data-drill :visible?] false))]
+       [:div {:style {:padding "10px"
+                      :height "100%"
+                      :overflow-y "scroll"}}
+        [Root data-atom]]]
+      [DataDrillShellVisibleButton visible? (fn [_] (swap! data-atom assoc-in [:data-drill :visible?] true))])))
+
 (defn mount-root []
   (r/render
-    [Root store]
+    [DataDrillShell store]
     (js/document.getElementById "app")))
 
 (defn ^:export main []
