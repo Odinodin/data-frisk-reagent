@@ -41,8 +41,10 @@
     [:div
      [ExpandButton {:expanded? expanded? :path path}]
      [:span "["]
-     (when expanded?
-       (map-indexed (fn [i x] ^{:key i} [DataDrill {:data x :path (conj path i) :expansion expansion}]) data))
+     (if expanded?
+       (map-indexed (fn [i x] ^{:key i} [DataDrill {:data x :path (conj path i) :expansion expansion}]) data)
+       (str (count data))
+       )
      [:span "]"]]))
 
 (defn MapNode [{:keys [data path expansion]}]
@@ -51,8 +53,9 @@
     [:div
      [ExpandButton {:expanded? expanded? :path path}]
      [:span "{"]
-     (when expanded?
-       (map-indexed (fn [i x] ^{:key i} [KeyValNode {:data x :path path :expansion expansion}]) data))
+     (if expanded?
+       (map-indexed (fn [i x] ^{:key i} [KeyValNode {:data x :path path :expansion expansion}]) data)
+       (clojure.string/join " " (keys data)))
 
      [:span "}"]]))
 
