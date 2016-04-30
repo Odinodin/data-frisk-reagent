@@ -134,20 +134,20 @@
 (defn DataDrillShell [data-atom]
   (let [data-drill (:data-drill @data-atom)
         visible? (:visible? data-drill)]
-    (if visible?
-      [:div {:style {:backgroundColor "#EEFFED"
-                     :position "fixed"
-                     :right 0
-                     :bottom 0
-                     :width "100%"
-                     :height "50%"
-                     :padding 0}}
-       [DataDrillShellVisibleButton visible? (fn [_] (swap! data-atom assoc-in [:data-drill :visible?] false))]
-       [:div {:style {:padding "10px"
-                      :height "100%"
-                      :overflow-y "scroll"}}
-        [Root data-atom]]]
-      [DataDrillShellVisibleButton visible? (fn [_] (swap! data-atom assoc-in [:data-drill :visible?] true))])))
+    [:div {:style {:backgroundColor "#EEFFED"
+                   :position "fixed"
+                   :right 0
+                   :bottom 0
+                   :width "100%"
+                   :height "50%"
+                   :max-height (if visible? "50%" 0)
+                   :transition "all 0.3s ease-out"
+                   :padding 0}}
+     [DataDrillShellVisibleButton visible? (fn [_] (swap! data-atom assoc-in [:data-drill :visible?] (not visible?)))]
+     [:div {:style {:padding "10px"
+                    :height "100%"
+                    :overflow-y "scroll"}}
+      [Root data-atom]]]))
 
 (defn mount-root []
   (r/render
