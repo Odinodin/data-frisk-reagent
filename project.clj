@@ -6,7 +6,8 @@
   :min-lein-version "2.6.1"
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.7.228"]
-                 [reagent "0.6.0-alpha"]]
+                 [reagent "0.6.0-alpha" :exclusions [cljsjs/react]]
+                 [cljsjs/react-with-addons "0.14.3-0"]]
   :plugins [[lein-figwheel "0.5.2"]
             [lein-cljsbuild "1.1.3" :exclusions [[org.clojure/clojure]]]]
   :source-paths ["src"]
@@ -14,14 +15,23 @@
   :figwheel {:http-server-root "public"}
 
   :profiles {:dev {:dependencies [[com.cemerick/piggieback "0.2.1"]
-                                  [figwheel-sidecar "0.5.2"]]
-                   :source-paths ["src" "dev"]
+                                  [figwheel-sidecar "0.5.2"]
+                                  [devcards "0.2.1-6" :exclusions [[cljsjs/react]]]]
+                   :source-paths ["src" "devcards"]
                    :cljsbuild {
                                :builds [{:id "dev"
-                                         :source-paths ["src/"]
+                                         :source-paths ["src"]
                                          :figwheel {:on-jsload "datadrill.core/on-js-reload"}
                                          :compiler {:main "datadrill.core"
                                                     :asset-path "js/out"
                                                     :output-to "resources/public/js/main.js"
-                                                    :output-dir "resources/public/js/out"}}]}}}
+                                                    :output-dir "resources/public/js/out"}}
+                                        {:id "cards"
+                                         :source-paths ["src" "devcards"]
+                                         :figwheel {:devcards true}
+                                         :compiler {:main "datadrill.cards"
+                                                    :asset-path "js/out-cards"
+                                                    :output-to "resources/public/js/cards.js"
+                                                    :output-dir "resources/public/js/out-cards"}}
+                                        ]}}}
   :clean-targets ^{:protect false} ["resources/public/js" "target"])
