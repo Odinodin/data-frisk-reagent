@@ -10,22 +10,15 @@
                            :e '(1 2 3)}
                     :data-drill {:expansion #{}}}))
 
-(defn emit [event & args]
-  (prn "Emit: " event args)
-  (case event
-    :expand (swap! store update-in [:data-drill :expansion] conj (first args))
-    :contract (swap! store update-in [:data-drill :expansion] disj (first args))
-    :collapse-all (swap! store assoc-in [:data-drill :expansion] #{})))
-
 (declare DataDrill)
 
-(defn ExpandButton [{:keys [expanded? path]}]
+(defn ExpandButton [{:keys [expanded? path emit-fn]}]
   (if expanded?
-    [:button {:onClick #(emit :contract path)} "-"]
-    [:button {:onClick #(emit :expand path)} "+"]))
+    [:button {:onClick #(emit-fn :contract path)} "-"]
+    [:button {:onClick #(emit-fn :expand path)} "+"]))
 
-(defn CollapseAllButton []
-  [:button {:onClick #(emit :collapse-all)} "Collapse all"])
+(defn CollapseAllButton [emit-fn]
+  [:button {:onClick #(emit-fn :collapse-all)} "Collapse all"])
 
 (defn Node [{:keys [data path]}]
   [:div (cond
@@ -37,44 +30,55 @@
           :else
           data)])
 
-(defn KeyValNode [{[k v] :data path :path expansion :expansion}]
+(defn KeyValNode [{[k v] :data path :path expansion :expansion emit-fn :emit-fn}]
   [:div {:style {:display "flex"}}
    [:div {:style {:flex 0 :padding "2px"}}
     (str k)]
    [:div {:style {:flex 1 :padding "2px"}}
     [DataDrill {:data v
                 :path (conj path k)
-                :expansion expansion}]]])
+                :expansion expansion
+                :emit-fn emit-fn}]]])
 
-(defn ListVecNode [{:keys [data path expansion]}]
+(defn ListVecNode [{:keys [data path expansion emit-fn]}]
   (let [expanded? (get expansion path)]
     [:div {:style {:display "flex"}}
-     [:div {:style {:flex 0}} [ExpandButton {:expanded? expanded? :path path}]]
+     [:div {:style {:flex 0}} [ExpandButton {:expanded? expanded?
+                                             :path path
+                                             :emit-fn emit-fn}]]
      [:div {:style {:flex 1}} [:span (if (list? data) "(" "[")]
       (if expanded?
-        (map-indexed (fn [i x] ^{:key i} [DataDrill {:data x :path (conj path i) :expansion expansion}]) data)
+        (map-indexed (fn [i x] ^{:key i} [DataDrill {:data x
+                                                     :path (conj path i)
+                                                     :expansion expansion
+                                                     :emit-fn emit-fn}]) data)
         (str (count data) " items"))
       [:span (if (list? data) ")" "]")]]]))
 
-(defn SetNode [{:keys [data path expansion]}]
+(defn SetNode [{:keys [data path expansion emit-fn]}]
   (let [expanded? (get expansion path)]
     [:div {:style {:display "flex"}}
-     [:div {:style {:flex 0}} [ExpandButton {:expanded? expanded? :path path}]]
+     [:div {:style {:flex 0}} [ExpandButton {:expanded? expanded?
+                                             :path path
+                                             :emit-fn emit-fn}]]
      [:div {:style {:flex 1}} [:span "#{"]
       (if expanded?
-        (map-indexed (fn [i x] ^{:key i} [DataDrill {:data x :path (conj path x)} :expansion expansion]) data)
+        (map-indexed (fn [i x] ^{:key i} [DataDrill {:data x
+                                                     :path (conj path x)
+                                                     :expansion expansion
+                                                     :emit-fn emit-fn}]) data)
         (str (count data) " items"))
       [:span "}"]]]))
 
-(defn MapNode [{:keys [data path expansion]}]
+(defn MapNode [{:keys [data path expansion emit-fn]}]
   (let [expanded? (get expansion path)]
     [:div {:style {:display "flex"}}
      [:div {:style {:flex 0}}
-      [ExpandButton {:expanded? expanded? :path path}]]
+      [ExpandButton {:expanded? expanded? :path path :emit-fn emit-fn}]]
      [:div {:style {:flex 1}}
       [:span "{"]
       (if expanded?
-        (map-indexed (fn [i x] ^{:key i} [KeyValNode {:data x :path path :expansion expansion}]) data)
+        (map-indexed (fn [i x] ^{:key i} [KeyValNode {:data x :path path :expansion expansion :emit-fn emit-fn}]) data)
         (clojure.string/join " " (keys data)))
       [:span "}"]]]))
 
@@ -84,15 +88,28 @@
         (or (vector? data) (list? data)) [ListVecNode all]
         :else [Node all]))
 
+(defn conj-to-set [coll x]
+  (conj (or coll #{}) x))
+
+(defn emit-fn-factory [data-atom]
+  (fn [event & args]
+    (prn "Emit: " event args)
+    (case event
+      :expand (swap! data-atom update-in [:data-drill :expansion] conj-to-set (first args))
+      :contract (swap! data-atom update-in [:data-drill :expansion] disj (first args))
+      :collapse-all (swap! data-atom assoc-in [:data-drill :expansion] #{}))))
+
 (defn Root [data-atom]
   (let [data-drill (:data-drill @data-atom)
+        emit-fn (emit-fn-factory data-atom)
         raw (dissoc @data-atom :data-drill)]
     [:div
      [:div (str data-drill)]
-     [CollapseAllButton]
+     [CollapseAllButton emit-fn]
      [DataDrill {:data raw
                  :path []
-                 :expansion (:expansion data-drill)}]]))
+                 :expansion (:expansion data-drill)
+                 :emit-fn emit-fn}]]))
 
 (defn DataDrillShellVisibleButton [visible? toggle-visible-fn]
   (if visible?

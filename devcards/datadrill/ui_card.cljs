@@ -5,9 +5,18 @@
   (:require-macros [devcards.core :as dc :refer [defcard-rg]]))
 
 (defcard-rg root
-  Root
-  (r/atom {:data-drill {:expansion #{[]}}
-           :data "ape" :b "c"
-           :c :d})
-  {:inspect-data true})
+  [Root (r/atom {:a "a"
+                 :b [1 2 3]
+                 :c :d})])
 
+(defcard-rg first-level-expanded
+  [Root (r/atom {:data-drill {:expansion #{[]}}
+                 :a "a"
+                 :b [1 2 3]
+                 :c :d})])
+
+(defcard-rg second-level-expanded
+  [Root (r/atom {:data-drill {:expansion #{[] [:b]}}
+                 :a "a"
+                 :b [1 2 3]
+                 :c :d})])
