@@ -1,4 +1,4 @@
-(ns datadrill.core
+(ns datafrisk.core
   (:require [reagent.core :as r]))
 
 (enable-console-print!)
@@ -8,9 +8,9 @@
                            :c #{1 2 3}
                            :d {:x "x" :y "y" :z [1 2 3 4]}
                            :e '(1 2 3)}
-                    :data-drill {:expansion #{}}}))
+                    :data-frisk {:expansion #{}}}))
 
-(declare DataDrill)
+(declare DataFrisk)
 
 (defn ExpandButton [{:keys [expanded? path emit-fn]}]
   [:button {:style {:border "0"
@@ -38,7 +38,7 @@
    [:div {:style {:flex 0 :padding "2px"}}
     (str k)]
    [:div {:style {:flex 1 :padding "2px"}}
-    [DataDrill {:data v
+    [DataFrisk {:data v
                 :path (conj path k)
                 :expansion expansion
                 :emit-fn emit-fn}]]])
@@ -51,7 +51,7 @@
                                              :emit-fn emit-fn}]]
      [:div {:style {:flex 1}} [:span (if (list? data) "(" "[")]
       (if expanded?
-        (map-indexed (fn [i x] ^{:key i} [DataDrill {:data x
+        (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
                                                      :path (conj path i)
                                                      :expansion expansion
                                                      :emit-fn emit-fn}]) data)
@@ -66,7 +66,7 @@
                                              :emit-fn emit-fn}]]
      [:div {:style {:flex 1}} [:span "#{"]
       (if expanded?
-        (map-indexed (fn [i x] ^{:key i} [DataDrill {:data x
+        (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
                                                      :path (conj path x)
                                                      :expansion expansion
                                                      :emit-fn emit-fn}]) data)
@@ -85,7 +85,7 @@
         (clojure.string/join " " (keys data)))
       [:span "}"]]]))
 
-(defn DataDrill [{:keys [data] :as all}]
+(defn DataFrisk [{:keys [data] :as all}]
   (cond (map? data) [MapNode all]
         (set? data) [SetNode all]
         (or (vector? data) (list? data)) [ListVecNode all]
@@ -98,23 +98,22 @@
   (fn [event & args]
     (prn "Emit: " event args)
     (case event
-      :expand (swap! data-atom update-in [:data-drill :expansion] conj-to-set (first args))
-      :contract (swap! data-atom update-in [:data-drill :expansion] disj (first args))
-      :collapse-all (swap! data-atom assoc-in [:data-drill :expansion] #{}))))
+      :expand (swap! data-atom update-in [:data-frisk :expansion] conj-to-set (first args))
+      :contract (swap! data-atom update-in [:data-frisk :expansion] disj (first args))
+      :collapse-all (swap! data-atom assoc-in [:data-frisk :expansion] #{}))))
 
 (defn Root [data-atom]
-  (let [data-drill (:data-drill @data-atom)
+  (let [data-frisk (:data-frisk @data-atom)
         emit-fn (emit-fn-factory data-atom)
-        raw (dissoc @data-atom :data-drill)]
+        raw (dissoc @data-atom :data-frisk)]
     [:div
-     [:div (str data-drill)]
      [CollapseAllButton emit-fn]
-     [DataDrill {:data raw
+     [DataFrisk {:data raw
                  :path []
-                 :expansion (:expansion data-drill)
+                 :expansion (:expansion data-frisk)
                  :emit-fn emit-fn}]]))
 
-(defn DataDrillShellVisibleButton [visible? toggle-visible-fn]
+(defn DataFriskShellVisibleButton [visible? toggle-visible-fn]
   (if visible?
     [:div {:onClick toggle-visible-fn
            :style {:backgroundColor "#4EE24E"
@@ -132,11 +131,11 @@
                    :right 0
                    :width "80px"
                    :text-align "center"}}
-     "Data drill"]))
+     "Data frisk"]))
 
-(defn DataDrillShell [data-atom]
-  (let [data-drill (:data-drill @data-atom)
-        visible? (:visible? data-drill)]
+(defn DataFriskShell [data-atom]
+  (let [data-frisk (:data-frisk @data-atom)
+        visible? (:visible? data-frisk)]
     [:div {:style {:backgroundColor "#EEFFED"
                    :position "fixed"
                    :right 0
@@ -146,7 +145,7 @@
                    :max-height (if visible? "50%" 0)
                    :transition "all 0.3s ease-out"
                    :padding 0}}
-     [DataDrillShellVisibleButton visible? (fn [_] (swap! data-atom assoc-in [:data-drill :visible?] (not visible?)))]
+     [DataFriskShellVisibleButton visible? (fn [_] (swap! data-atom assoc-in [:data-frisk :visible?] (not visible?)))]
      [:div {:style {:padding "10px"
                     :height "100%"
                     :box-sizing "border-box"
@@ -155,7 +154,7 @@
 
 (defn mount-root []
   (r/render
-    [DataDrillShell store]
+    [DataFriskShell store]
     (js/document.getElementById "app")))
 
 (defn ^:export main []

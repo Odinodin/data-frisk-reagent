@@ -1,6 +1,6 @@
-(defproject data-drill-reagent "0.1.0-SNAPSHOT"
-  :description "Drilling EDN since 2016!"
-  :url "http://github.com/odinodin/data-drill-reagent"
+(defproject data-frisk-reagent "0.1.0-SNAPSHOT"
+  :description "Frisking EDN since 2016!"
+  :url "http://github.com/odinodin/data-frisk-reagent"
   :license {:name "MIT"
             :url "https://opensource.org/licenses/MIT"}
   :min-lein-version "2.6.1"
@@ -21,17 +21,16 @@
                    :cljsbuild {
                                :builds [{:id "dev"
                                          :source-paths ["src"]
-                                         :figwheel {:on-jsload "datadrill.core/on-js-reload"}
-                                         :compiler {:main "datadrill.core"
+                                         :figwheel {:on-jsload "datafrisk.core/on-js-reload"}
+                                         :compiler {:main "datafrisk.core"
                                                     :asset-path "js/out"
                                                     :output-to "resources/public/js/main.js"
                                                     :output-dir "resources/public/js/out"}}
                                         {:id "cards"
                                          :source-paths ["src" "devcards"]
                                          :figwheel {:devcards true}
-                                         :compiler {:main "datadrill.cards"
+                                         :compiler {:main "datafrisk.cards"
                                                     :asset-path "js/out-cards"
                                                     :output-to "resources/public/js/cards.js"
-                                                    :output-dir "resources/public/js/out-cards"}}
-                                        ]}}}
+                                                    :output-dir "resources/public/js/out-cards"}}]}}}
   :clean-targets ^{:protect false} ["resources/public/js" "target"])
