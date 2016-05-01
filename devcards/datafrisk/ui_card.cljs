@@ -4,10 +4,13 @@
             [datafrisk.core :refer [Root]])
   (:require-macros [devcards.core :as dc :refer [defcard-rg]]))
 
-(defcard-rg root
-  [Root (r/atom {:a "a"
-                 :b [1 2 3]
-                 :c :d})])
+(defcard-rg data-types
+  [Root (r/atom {:a "I'm a string"
+                 :b :imakeyword
+                 :c [1 2 3]
+                 :d '(1 2 3)
+                 :e #{1 2 3}
+                 :f (clj->js {:i-am "an-object"})})])
 
 (defcard-rg first-level-expanded
   [Root (r/atom {:data-frisk {:expansion #{[]}}

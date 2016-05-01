@@ -7,7 +7,9 @@
                            :b [1 2 3 3 {:a "a" :b "b"}]
                            :c #{1 2 3}
                            :d {:x "x" :y "y" :z [1 2 3 4]}
-                           :e '(1 2 3)}
+                           :e '(1 2 3)
+                           :f (clj->js {:a "a"})}
+
                     :data-frisk {:expansion #{}}}))
 
 (declare DataFrisk)
@@ -30,8 +32,12 @@
 
           (keyword? data)
           (str data)
+
+          (object? data)
+          (str data " " (.stringify js/JSON data))
+
           :else
-          data)])
+          (str data))])
 
 (defn KeyValNode [{[k v] :data path :path expansion :expansion emit-fn :emit-fn}]
   [:div {:style {:display "flex"}}
