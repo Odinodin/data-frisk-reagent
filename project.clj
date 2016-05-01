@@ -18,6 +18,7 @@
                                   [figwheel-sidecar "0.5.2"]
                                   [devcards "0.2.1-6" :exclusions [[cljsjs/react]]]]
                    :source-paths ["src" "devcards"]
+                   :resource-paths ["devresources"]
                    :cljsbuild {
                                :builds [{:id "dev"
                                          :source-paths ["src"]
