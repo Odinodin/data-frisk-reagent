@@ -1,17 +1,6 @@
 (ns datafrisk.core
   (:require [reagent.core :as r]))
 
-(enable-console-print!)
-
-(def store (r/atom {:data {:a "a"
-                           :b [1 2 3 3 {:a "a" :b "b"}]
-                           :c #{1 2 3}
-                           :d {:x "x" :y "y" :z [1 2 3 4]}
-                           :e '(1 2 3)
-                           :f (clj->js {:a "a"})}
-
-                    :data-frisk {:expansion #{}}}))
-
 (declare DataFrisk)
 
 (defn ExpandButton [{:keys [expanded? path emit-fn]}]
@@ -22,19 +11,33 @@
     [:polygon {:points (if expanded? "0,0 100,0 50,100"
                                      "0,0 0,100 100,50") :stroke "black"}]]])
 
+(def styles
+  {:shell {:backgroundColor "#FAFAFA"}
+   :strings {:color "#4Ebb4E"}
+   :keywords {:color "purple"}
+   :numbers {:color "blue"}
+   :shell-visible-button {:backgroundColor "#4EE24E"}})
+
 (defn CollapseAllButton [emit-fn]
-  [:button {:onClick #(emit-fn :collapse-all)} "Collapse all"])
+  [:button {:onClick #(emit-fn :collapse-all)
+            :style {:padding "7px"
+                    :border 1
+                    :backgroundColor "lightgray"}}
+   "Collapse all"])
 
 (defn Node [{:keys [data path]}]
   [:div (cond
           (string? data)
-          (str "'" data "'")
+          [:span {:style (:strings styles)} (str "\"" data "\"")]
 
           (keyword? data)
-          (str data)
+          [:span {:style (:keywords styles)} (str data)]
 
           (object? data)
           (str data " " (.stringify js/JSON data))
+
+          (number? data)
+          [:span {:style (:numbers styles)} data]
 
           :else
           (str data))])
@@ -42,7 +45,7 @@
 (defn KeyValNode [{[k v] :data path :path expansion :expansion emit-fn :emit-fn}]
   [:div {:style {:display "flex"}}
    [:div {:style {:flex 0 :padding "2px"}}
-    (str k)]
+    [:span {:style (:keywords styles)} (str k)]]
    [:div {:style {:flex 1 :padding "2px"}}
     [DataFrisk {:data v
                 :path (conj path k)
@@ -88,7 +91,7 @@
       [:span "{"]
       (if expanded?
         (map-indexed (fn [i x] ^{:key i} [KeyValNode {:data x :path path :expansion expansion :emit-fn emit-fn}]) data)
-        (clojure.string/join " " (keys data)))
+        [:span {:style (:keywords styles)} (clojure.string/join " " (keys data))])
       [:span "}"]]]))
 
 (defn DataFrisk [{:keys [data] :as all}]
@@ -119,52 +122,33 @@
                  :expansion (:expansion data-frisk)
                  :emit-fn emit-fn}]]))
 
+
 (defn DataFriskShellVisibleButton [visible? toggle-visible-fn]
-  (if visible?
-    [:div {:onClick toggle-visible-fn
-           :style {:backgroundColor "#4EE24E"
-                   :padding "12px"
-                   :position "fixed"
-                   :right 0
-                   :width "80px"
-                   :text-align "center"}}
-     "Hide"]
-    [:div {:onClick toggle-visible-fn
-           :style {:backgroundColor "#4EE24E"
-                   :padding "12px"
-                   :position "fixed"
-                   :bottom 0
-                   :right 0
-                   :width "80px"
-                   :text-align "center"}}
-     "Data frisk"]))
+  [:div {:onClick toggle-visible-fn
+         :style (merge {:padding "12px"
+                        :position "fixed"
+                        :right 0
+                        :width "80px"
+                        :text-align "center"}
+                  (:shell-visible-button styles)
+                  (when-not visible? {:bottom 0}))}
+   (if visible? "Hide" "Data frisk")])
 
 (defn DataFriskShell [data-atom]
   (let [data-frisk (:data-frisk @data-atom)
         visible? (:visible? data-frisk)]
-    [:div {:style {:backgroundColor "#EEFFED"
-                   :position "fixed"
-                   :right 0
-                   :bottom 0
-                   :width "100%"
-                   :height "50%"
-                   :max-height (if visible? "50%" 0)
-                   :transition "all 0.3s ease-out"
-                   :padding 0}}
+    [:div {:style (merge {:position "fixed"
+                          :right 0
+                          :bottom 0
+                          :width "100%"
+                          :height "50%"
+                          :max-height (if visible? "50%" 0)
+                          :transition "all 0.3s ease-out"
+                          :padding 0}
+                    (:shell styles))}
      [DataFriskShellVisibleButton visible? (fn [_] (swap! data-atom assoc-in [:data-frisk :visible?] (not visible?)))]
      [:div {:style {:padding "10px"
                     :height "100%"
                     :box-sizing "border-box"
                     :overflow-y "scroll"}}
       [Root data-atom]]]))
-
-(defn mount-root []
-  (r/render
-    [DataFriskShell store]
-    (js/document.getElementById "app")))
-
-(defn ^:export main []
-  (mount-root))
-
-(defn on-js-reload []
-  (mount-root))

@@ -21,9 +21,9 @@
                    :resource-paths ["devresources"]
                    :cljsbuild {
                                :builds [{:id "dev"
-                                         :source-paths ["src"]
-                                         :figwheel {:on-jsload "datafrisk.core/on-js-reload"}
-                                         :compiler {:main "datafrisk.core"
+                                         :source-paths ["src" "dev"]
+                                         :figwheel {:on-jsload "datafrisk.demo/on-js-reload"}
+                                         :compiler {:main "datafrisk.demo"
                                                     :asset-path "js/out"
                                                     :output-to "resources/public/js/main.js"
                                                     :output-dir "resources/public/js/out"}}
