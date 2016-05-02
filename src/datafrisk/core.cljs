@@ -44,9 +44,9 @@
 
 (defn KeyValNode [{[k v] :data path :path expansion :expansion emit-fn :emit-fn}]
   [:div {:style {:display "flex"}}
-   [:div {:style {:flex 0 :padding "2px"}}
+   [:div {:style {:flex "0 0 auto" :padding "2px"}}
     [:span {:style (:keywords styles)} (str k)]]
-   [:div {:style {:flex 1 :padding "2px"}}
+   [:div {:style {:flex "1" :padding "2px"}}
     [DataFrisk {:data v
                 :path (conj path k)
                 :expansion expansion

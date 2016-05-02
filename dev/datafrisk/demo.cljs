@@ -10,7 +10,7 @@
                            :d {:x "x" :y "y" :z [1 2 3 4]}
                            :e '(1 2 3)
                            :f (clj->js {:a "a"})
-                           :g :g}
+                           :this-is-a-very-long-keyword :g}
 
                     :data-frisk {:expansion #{[] [:data]}
                                  :visible? true}}))
