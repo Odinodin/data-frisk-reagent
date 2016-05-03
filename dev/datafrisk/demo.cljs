@@ -4,13 +4,15 @@
 
 (enable-console-print!)
 
-(def store (r/atom {:data {:a "a"
-                           :b [1 2 3 3 {:a "a" :b "b"}]
-                           :c #{1 2 3}
-                           :d {:x "x" :y "y" :z [1 2 3 4]}
-                           :e '(1 2 3)
-                           :f (clj->js {:a "a"})
-                           :this-is-a-very-long-keyword :g}
+(def store (r/atom {:data {:some-string "a"
+                           :vector-with-map [1 2 3 3 {:a "a" :b "b"}]
+                           :a-set #{1 2 3}
+                           :a-map {:x "x" :y "y" :z [1 2 3 4]}
+                           :a-list '(1 2 3)
+                           :a-seq (seq [1 2])
+                           :an-object (clj->js {:a "a"})
+                           :this-is-a-very-long-keyword :g
+                           }
 
                     :data-frisk {:expansion #{[] [:data]}
                                  :visible? true}}))

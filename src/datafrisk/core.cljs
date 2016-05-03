@@ -58,14 +58,14 @@
      [:div {:style {:flex 0}} [ExpandButton {:expanded? expanded?
                                              :path path
                                              :emit-fn emit-fn}]]
-     [:div {:style {:flex 1}} [:span (if (list? data) "(" "[")]
+     [:div {:style {:flex 1}} [:span (if (vector? data) "[" "(")]
       (if expanded?
         (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
                                                      :path (conj path i)
                                                      :expansion expansion
                                                      :emit-fn emit-fn}]) data)
         (str (count data) " items"))
-      [:span (if (list? data) ")" "]")]]]))
+      [:span (if (vector? data) "]" ")")]]]))
 
 (defn SetNode [{:keys [data path expansion emit-fn]}]
   (let [expanded? (get expansion path)]
@@ -97,7 +97,7 @@
 (defn DataFrisk [{:keys [data] :as all}]
   (cond (map? data) [MapNode all]
         (set? data) [SetNode all]
-        (or (vector? data) (list? data)) [ListVecNode all]
+        (or (seq? data) (vector? data)) [ListVecNode all]
         :else [Node all]))
 
 (defn conj-to-set [coll x]
@@ -121,7 +121,6 @@
                  :path []
                  :expansion (:expansion data-frisk)
                  :emit-fn emit-fn}]]))
-
 
 (defn DataFriskShellVisibleButton [visible? toggle-visible-fn]
   [:div {:onClick toggle-visible-fn
