@@ -42,18 +42,18 @@
           :else
           (str data))])
 
-(defn KeyValNode [{[k v] :data path :path expansion :expansion emit-fn :emit-fn}]
+(defn KeyValNode [{[k v] :data path :path expanded-paths :expanded-paths emit-fn :emit-fn}]
   [:div {:style {:display "flex"}}
    [:div {:style {:flex "0 0 auto" :padding "2px"}}
     [:span {:style (:keywords styles)} (str k)]]
    [:div {:style {:flex "1" :padding "2px"}}
     [DataFrisk {:data v
                 :path (conj path k)
-                :expansion expansion
+                :expanded-paths expanded-paths
                 :emit-fn emit-fn}]]])
 
-(defn ListVecNode [{:keys [data path expansion emit-fn]}]
-  (let [expanded? (get expansion path)]
+(defn ListVecNode [{:keys [data path expanded-paths emit-fn]}]
+  (let [expanded? (get expanded-paths path)]
     [:div {:style {:display "flex"}}
      [:div {:style {:flex 0}} [ExpandButton {:expanded? expanded?
                                              :path path
@@ -62,13 +62,13 @@
       (if expanded?
         (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
                                                      :path (conj path i)
-                                                     :expansion expansion
+                                                     :expanded-paths expanded-paths
                                                      :emit-fn emit-fn}]) data)
         (str (count data) " items"))
       [:span (if (vector? data) "]" ")")]]]))
 
-(defn SetNode [{:keys [data path expansion emit-fn]}]
-  (let [expanded? (get expansion path)]
+(defn SetNode [{:keys [data path expanded-paths emit-fn]}]
+  (let [expanded? (get expanded-paths path)]
     [:div {:style {:display "flex"}}
      [:div {:style {:flex 0}} [ExpandButton {:expanded? expanded?
                                              :path path
@@ -77,20 +77,20 @@
       (if expanded?
         (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
                                                      :path (conj path x)
-                                                     :expansion expansion
+                                                     :expanded-paths expanded-paths
                                                      :emit-fn emit-fn}]) data)
         (str (count data) " items"))
       [:span "}"]]]))
 
-(defn MapNode [{:keys [data path expansion emit-fn]}]
-  (let [expanded? (get expansion path)]
+(defn MapNode [{:keys [data path expanded-paths emit-fn]}]
+  (let [expanded? (get expanded-paths path)]
     [:div {:style {:display "flex"}}
      [:div {:style {:flex 0}}
       [ExpandButton {:expanded? expanded? :path path :emit-fn emit-fn}]]
      [:div {:style {:flex 1}}
       [:span "{"]
       (if expanded?
-        (map-indexed (fn [i x] ^{:key i} [KeyValNode {:data x :path path :expansion expansion :emit-fn emit-fn}]) data)
+        (map-indexed (fn [i x] ^{:key i} [KeyValNode {:data x :path path :expanded-paths expanded-paths :emit-fn emit-fn}]) data)
         [:span {:style (:keywords styles)} (clojure.string/join " " (keys data))])
       [:span "}"]]]))
 
@@ -107,9 +107,9 @@
   (fn [event & args]
     (prn "Emit: " event args)
     (case event
-      :expand (swap! data-atom update-in [:data-frisk :expansion] conj-to-set (first args))
-      :contract (swap! data-atom update-in [:data-frisk :expansion] disj (first args))
-      :collapse-all (swap! data-atom assoc-in [:data-frisk :expansion] #{}))))
+      :expand (swap! data-atom update-in [:data-frisk :expanded-paths] conj-to-set (first args))
+      :contract (swap! data-atom update-in [:data-frisk :expanded-paths] disj (first args))
+      :collapse-all (swap! data-atom assoc-in [:data-frisk :expanded-paths] #{}))))
 
 (defn Root [data-atom]
   (let [data-frisk (:data-frisk @data-atom)
@@ -119,7 +119,7 @@
      [CollapseAllButton emit-fn]
      [DataFrisk {:data raw
                  :path []
-                 :expansion (:expansion data-frisk)
+                 :expanded-paths (:expanded-paths data-frisk)
                  :emit-fn emit-fn}]]))
 
 (defn DataFriskShellVisibleButton [visible? toggle-visible-fn]

@@ -14,7 +14,7 @@
                            :this-is-a-very-long-keyword :g
                            }
 
-                    :data-frisk {:expansion #{[] [:data]}
+                    :data-frisk {:expanded-paths #{[] [:data]}
                                  :visible? true}}))
 
 (defn mount-root []
