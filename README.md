@@ -1,8 +1,21 @@
+# data-frisk-reagent
+
+"Get your facts first, then you can distort them as you please" - Mark Twain
+
+Visualize your atom data in your Reagent apps as a tree structure.
+
+Suitable for use during development.
+
+## Install
+
+Add `[data-frisk-reagent "0.1.3"]` to the dev `:dependencies` in your `project.clj`
+
+## Usage
+
+```clojure
 (ns datafrisk.demo
   (:require [reagent.core :as r]
             [datafrisk.core :as d]))
-
-(enable-console-print!)
 
 (def store (r/atom {:data {:some-string "a"
                            :vector-with-map [1 2 3 3 {:a "a" :b "b"}]
@@ -16,13 +29,15 @@
                     :data-frisk {:expanded-paths #{[] [:data]}
                                  :visible? true}}))
 
-(defn mount-root []
-  (r/render
+(r/render
     [d/DataFriskShell store]
-    (js/document.getElementById "app")))
+    (js/document.getElementById "app"))
+```
 
-(defn ^:export main []
-  (mount-root))
+See the dev/demo.cljs namespace for usage
 
-(defn on-js-reload []
-  (mount-root))
+## License
+
+Copyright © 2016 Odin Standal
+
+Distributed under the MIT License (MIT)
