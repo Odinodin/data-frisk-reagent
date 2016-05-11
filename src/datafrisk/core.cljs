@@ -133,21 +133,24 @@
                   (when-not visible? {:bottom 0}))}
    (if visible? "Hide" "Data frisk")])
 
+
 (defn DataFriskShell [data-atom]
-  (let [data-frisk (:data-frisk @data-atom)
-        visible? (:visible? data-frisk)]
-    [:div {:style (merge {:position "fixed"
-                          :right 0
-                          :bottom 0
-                          :width "100%"
-                          :height "50%"
-                          :max-height (if visible? "50%" 0)
-                          :transition "all 0.3s ease-out"
-                          :padding 0}
-                    (:shell styles))}
-     [DataFriskShellVisibleButton visible? (fn [_] (swap! data-atom assoc-in [:data-frisk :visible?] (not visible?)))]
-     [:div {:style {:padding "10px"
-                    :height "100%"
-                    :box-sizing "border-box"
-                    :overflow-y "scroll"}}
-      [Root data-atom]]]))
+  (swap! data-atom assoc-in [:data-frisk :expanded-paths] #{[]})
+  (fn [data-atom]
+    (let [data-frisk (:data-frisk @data-atom)
+          visible? (:visible? data-frisk)]
+      [:div {:style (merge {:position "fixed"
+                            :right 0
+                            :bottom 0
+                            :width "100%"
+                            :height "50%"
+                            :max-height (if visible? "50%" 0)
+                            :transition "all 0.3s ease-out"
+                            :padding 0}
+                      (:shell styles))}
+       [DataFriskShellVisibleButton visible? (fn [_] (swap! data-atom assoc-in [:data-frisk :visible?] (not visible?)))]
+       [:div {:style {:padding "10px"
+                      :height "100%"
+                      :box-sizing "border-box"
+                      :overflow-y "scroll"}}
+        [Root data-atom]]])))

@@ -12,9 +12,7 @@
                            :a-seq (seq [1 2])
                            :an-object (clj->js {:a "a"})
                            :this-is-a-very-long-keyword :g}
-
-                    :data-frisk {:expanded-paths #{[] [:data]}
-                                 :visible? true}}))
+                    :data-frisk {:visible? true}}))
 
 (defn mount-root []
   (r/render
