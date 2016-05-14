@@ -111,13 +111,12 @@
       :contract (swap! data-atom update-in [:data-frisk :expanded-paths] disj (first args))
       :collapse-all (swap! data-atom assoc-in [:data-frisk :expanded-paths] #{}))))
 
-(defn Root [data-atom]
-  (let [data-frisk (:data-frisk @data-atom)
-        emit-fn (emit-fn-factory data-atom)
-        raw (dissoc @data-atom :data-frisk)]
+(defn Root [data state-atom]
+  (let [data-frisk (:data-frisk @state-atom)
+        emit-fn (emit-fn-factory state-atom)]
     [:div
      [CollapseAllButton emit-fn]
-     [DataFrisk {:data raw
+     [DataFrisk {:data data
                  :path []
                  :expanded-paths (:expanded-paths data-frisk)
                  :emit-fn emit-fn}]]))
@@ -132,7 +131,6 @@
                   (:shell-visible-button styles)
                   (when-not visible? {:bottom 0}))}
    (if visible? "Hide" "Data frisk")])
-
 
 (defn DataFriskShell [data-atom]
   (swap! data-atom assoc-in [:data-frisk :expanded-paths] #{[]})
@@ -153,4 +151,4 @@
                       :height "100%"
                       :box-sizing "border-box"
                       :overflow-y "scroll"}}
-        [Root data-atom]]])))
+        [Root (dissoc @data-atom :data-frisk) data-atom]]])))
