@@ -103,22 +103,22 @@
 (defn conj-to-set [coll x]
   (conj (or coll #{}) x))
 
-(defn emit-fn-factory [data-atom]
+(defn emit-fn-factory [data-atom id]
   (fn [event & args]
-    (prn "Emit: " event args)
+    (prn "Emit: " id event args)
     (case event
-      :expand (swap! data-atom update-in [:data-frisk :expanded-paths] conj-to-set (first args))
-      :contract (swap! data-atom update-in [:data-frisk :expanded-paths] disj (first args))
-      :collapse-all (swap! data-atom assoc-in [:data-frisk :expanded-paths] #{}))))
+      :expand (swap! data-atom update-in [:data-frisk id :expanded-paths] conj-to-set (first args))
+      :contract (swap! data-atom update-in [:data-frisk id :expanded-paths] disj (first args))
+      :collapse-all (swap! data-atom assoc-in [:data-frisk id :expanded-paths] #{}))))
 
-(defn Root [data state-atom]
+(defn Root [data id state-atom]
   (let [data-frisk (:data-frisk @state-atom)
-        emit-fn (emit-fn-factory state-atom)]
+        emit-fn (emit-fn-factory state-atom id)]
     [:div
      [CollapseAllButton emit-fn]
      [DataFrisk {:data data
                  :path []
-                 :expanded-paths (:expanded-paths data-frisk)
+                 :expanded-paths (get-in data-frisk [id :expanded-paths])
                  :emit-fn emit-fn}]]))
 
 (defn DataFriskShellVisibleButton [visible? toggle-visible-fn]
@@ -132,10 +132,13 @@
                   (when-not visible? {:bottom 0}))}
    (if visible? "Hide" "Data frisk")])
 
-(defn DataFriskShell [data-atom]
-  (swap! data-atom assoc-in [:data-frisk :expanded-paths] #{[]})
-  (fn [data-atom]
-    (let [data-frisk (:data-frisk @data-atom)
+(defn DataFriskShell [state-atom & data]
+
+  (doseq [id (range (count data))]
+    (swap! state-atom assoc-in [:data-frisk id :expanded-paths] #{[]}))
+
+  (fn [state-atom & data]
+    (let [data-frisk (:data-frisk @state-atom)
           visible? (:visible? data-frisk)]
       [:div {:style (merge {:position "fixed"
                             :right 0
@@ -146,9 +149,10 @@
                             :transition "all 0.3s ease-out"
                             :padding 0}
                       (:shell styles))}
-       [DataFriskShellVisibleButton visible? (fn [_] (swap! data-atom assoc-in [:data-frisk :visible?] (not visible?)))]
+       [DataFriskShellVisibleButton visible? (fn [_] (swap! state-atom assoc-in [:data-frisk :visible?] (not visible?)))]
        [:div {:style {:padding "10px"
                       :height "100%"
                       :box-sizing "border-box"
                       :overflow-y "scroll"}}
-        [Root (dissoc @data-atom :data-frisk) data-atom]]])))
+        (map-indexed (fn [id x]
+                       ^{:key id} [Root x id state-atom]) data)]])))

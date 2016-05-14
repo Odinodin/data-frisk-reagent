@@ -16,7 +16,7 @@
 
 (defn mount-root []
   (r/render
-    [d/DataFriskShell store]
+    [d/DataFriskShell store (:data @store) {:a :b :c :d}]
     (js/document.getElementById "app")))
 
 (defn ^:export main []

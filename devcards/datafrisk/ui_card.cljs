@@ -12,6 +12,7 @@
     :d '(1 2 3)
     :e #{1 2 3}
     :f (clj->js {:i-am "an-object"})}
+   "root"
    (r/atom {})])
 
 (defcard-rg first-level-expanded
@@ -19,10 +20,12 @@
    {:a "a"
     :b [1 2 3]
     :c :d}
+   "root"
    (r/atom {:data-frisk {:expanded-paths #{[]}}})])
 
 (defcard-rg second-level-expanded
   [Root {:a "a"
          :b [1 2 3]
          :c :d}
+   "root"
    (r/atom {:data-frisk {:expanded-paths #{[] [:b]}}})])
