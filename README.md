@@ -1,14 +1,15 @@
 # data-frisk-reagent
 
-"Get your facts first, then you can distort them as you please" - Mark Twain
+> "Get your facts first, then you can distort them as you please" - Mark Twain
 
-Visualize your atom data in your Reagent apps as a tree structure.
+
+Visualize your data in your Reagent apps as a tree structure.
 
 Suitable for use during development.
 
 ## Install
 
-Add `[data-frisk-reagent "0.1.3"]` to the dev `:dependencies` in your `project.clj`
+Add `[data-frisk-reagent "0.2.0"]` to the dev `:dependencies` in your `project.clj`
 
 ## Usage
 
@@ -17,21 +18,24 @@ Add `[data-frisk-reagent "0.1.3"]` to the dev `:dependencies` in your `project.c
   (:require [reagent.core :as r]
             [datafrisk.core :as d]))
 
-(def store (r/atom {:data {:some-string "a"
-                           :vector-with-map [1 2 3 3 {:a "a" :b "b"}]
-                           :a-set #{1 2 3}
-                           :a-map {:x "x" :y "y" :z [1 2 3 4]}
-                           :a-list '(1 2 3)
-                           :a-seq (seq [1 2])
-                           :an-object (clj->js {:a "a"})
-                           :this-is-a-very-long-keyword :g}
+;; Needed in order to keep track of the state in the data frisk shell
+(def some-atom (r/atom {:data-frisk {:visible? true}}))
 
-                    :data-frisk {:expanded-paths #{[] [:data]}
-                                 :visible? true}}))
-
-(r/render
-    [d/DataFriskShell store]
-    (js/document.getElementById "app"))
+(defn mount-root []
+  (r/render
+    [d/DataFriskShell
+     some-atom
+     ;; List of arguments you want to visualize
+     {:data {:some-string "a"
+             :vector-with-map [1 2 3 3 {:a "a" :b "b"}]
+             :a-set #{1 2 3}
+             :a-map {:x "x" :y "y" :z [1 2 3 4]}
+             :a-list '(1 2 3)
+             :a-seq (seq [1 2])
+             :an-object (clj->js {:a "a"})
+             :this-is-a-very-long-keyword :g}}
+     {:a :b :c :d}]
+    (js/document.getElementById "app")))
 ```
 
 See the dev/demo.cljs namespace for usage
