@@ -2,10 +2,11 @@
 
 > "Get your facts first, then you can distort them as you please" - Mark Twain
 
-
 Visualize your data in your Reagent apps as a tree structure.
 
 Suitable for use during development.
+
+<img src="data-frisk.gif">
 
 ## Install
 
