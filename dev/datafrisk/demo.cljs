@@ -28,7 +28,7 @@
       [:div
        [Animals data]
        [d/DataFriskShell
-        some-atom
+        #_some-atom
         ;; List of arguments you want to visualize
         data]]
       (js/document.getElementById "app"))))
