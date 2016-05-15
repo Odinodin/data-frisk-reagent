@@ -98,6 +98,7 @@
   (cond (map? data) [MapNode all]
         (set? data) [SetNode all]
         (or (seq? data) (vector? data)) [ListVecNode all]
+        (satisfies? IDeref data) [DataFrisk (assoc all :data @data)]
         :else [Node all]))
 
 (defn conj-to-set [coll x]

@@ -19,13 +19,9 @@ Add `[data-frisk-reagent "0.2.0"]` to the dev `:dependencies` in your `project.c
   (:require [reagent.core :as r]
             [datafrisk.core :as d]))
 
-;; Needed in order to keep track of the state in the data frisk shell
-(def some-atom (r/atom {:data-frisk {:visible? true}}))
-
 (defn mount-root []
   (r/render
     [d/DataFriskShell
-     some-atom
      ;; List of arguments you want to visualize
      {:data {:some-string "a"
              :vector-with-map [1 2 3 3 {:a "a" :b "b"}]

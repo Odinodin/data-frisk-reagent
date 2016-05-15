@@ -9,9 +9,6 @@
    [:ul
     (map-indexed (fn [i {:keys [animal age]}] ^{:key i} [:li (str animal ", " age " years old")]) (:animals data))]])
 
-;; Needed in order to keep track of the state in the data frisk shell
-(def some-atom (r/atom {:data-frisk {:visible? true}}))
-
 (defn mount-root []
   (let [data {:animals '({:animal "Monkey", :age 2}
                          {:animal "Giraffe", :age 4}
@@ -28,9 +25,9 @@
       [:div
        [Animals data]
        [d/DataFriskShell
-        #_some-atom
         ;; List of arguments you want to visualize
-        data]]
+        data
+        {:a :b :c :d}]]
       (js/document.getElementById "app"))))
 
 (defn ^:export main []
