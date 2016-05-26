@@ -136,7 +136,7 @@
 (defn DataFriskShell [& data]
   (let [expand-by-default (reduce #(assoc-in %1 [:data-frisk %2 :expanded-paths] #{[]}) {} (range (count data)))
         state-atom (r/atom expand-by-default)]
-    (fn []
+    (fn [& data]
       (let [data-frisk (:data-frisk @state-atom)
             visible? (:visible? data-frisk)]
         [:div {:style (merge {:position "fixed"
