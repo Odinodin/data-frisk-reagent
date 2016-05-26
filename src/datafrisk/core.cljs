@@ -21,6 +21,7 @@
 (defn CollapseAllButton [emit-fn]
   [:button {:onClick #(emit-fn :collapse-all)
             :style {:padding "7px"
+                    :cursor "pointer"
                     :border 1
                     :backgroundColor "lightgray"}}
    "Collapse all"])
@@ -123,8 +124,11 @@
                  :emit-fn emit-fn}]]))
 
 (defn DataFriskShellVisibleButton [visible? toggle-visible-fn]
-  [:div {:onClick toggle-visible-fn
-         :style (merge {:padding "12px"
+  [:button {:onClick toggle-visible-fn
+         :style (merge {:border 0
+                        :cursor "pointer"
+                        :font "inherit"
+                        :padding "12px"
                         :position "fixed"
                         :right 0
                         :width "80px"
