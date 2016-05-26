@@ -5,9 +5,10 @@
 
 (defn ExpandButton [{:keys [expanded? path emit-fn]}]
   [:button {:style {:border "0"
-                    :backgroundColor "transparent" :width "20px " :height "20px"}
+                    :backgroundColor "transparent" :width "20px" :height "20px"}
             :onClick #(emit-fn (if expanded? :contract :expand) path)}
-   [:svg {:viewBox "0 0 100 100"}
+   [:svg {:viewBox "0 0 100 100"
+          :width "100%" :height "100%"}
     [:polygon {:points (if expanded? "0,0 100,0 50,100"
                                      "0,0 0,100 100,50") :stroke "black"}]]])
 
