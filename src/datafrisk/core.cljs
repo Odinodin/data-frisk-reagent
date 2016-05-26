@@ -144,6 +144,8 @@
       (let [data-frisk (:data-frisk @state-atom)
             visible? (:visible? data-frisk)]
         [:div {:style (merge {:position "fixed"
+                              :fontFamily "Consolas,Monaco,Courier New,monospace"
+                              :fontSize "12px"
                               :right 0
                               :bottom 0
                               :width "100%"
