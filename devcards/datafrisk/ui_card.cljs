@@ -21,11 +21,18 @@
     :b [1 2 3]
     :c :d}
    "root"
-   (r/atom {:data-frisk {:expanded-paths #{[]}}})])
+   (r/atom {:data-frisk {"root" {:expanded-paths #{[]}}}})])
 
 (defcard-rg second-level-expanded
   [Root {:a "a"
          :b [1 2 3]
          :c :d}
    "root"
-   (r/atom {:data-frisk {:expanded-paths #{[] [:b]}}})])
+   (r/atom {:data-frisk {"root" {:expanded-paths #{[] [:b]}}}})])
+
+(defcard-rg empty-collections
+  [Root {:set #{}
+         :vec []
+         :list '()}
+   "root"
+   (r/atom {:data-frisk {"root" {:expanded-paths #{[]}}}})])

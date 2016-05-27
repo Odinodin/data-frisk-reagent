@@ -57,10 +57,12 @@
 (defn ListVecNode [{:keys [data path expanded-paths emit-fn]}]
   (let [expanded? (get expanded-paths path)]
     [:div {:style {:display "flex"}}
-     [:div {:style {:flex 0}} [ExpandButton {:expanded? expanded?
-                                             :path path
-                                             :emit-fn emit-fn}]]
-     [:div {:style {:flex 1}} [:span (if (vector? data) "[" "(")]
+     (when-not (empty? data)
+       [:div {:style {:flex 0}} [ExpandButton {:expanded? expanded?
+                                               :path path
+                                               :emit-fn emit-fn}]])
+     [:div {:style {:flex 1}}
+      [:span (if (vector? data) "[" "(")]
       (if expanded?
         (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
                                                      :path (conj path i)
@@ -72,9 +74,11 @@
 (defn SetNode [{:keys [data path expanded-paths emit-fn]}]
   (let [expanded? (get expanded-paths path)]
     [:div {:style {:display "flex"}}
-     [:div {:style {:flex 0}} [ExpandButton {:expanded? expanded?
-                                             :path path
-                                             :emit-fn emit-fn}]]
+     (when-not (empty? data)
+       [:div {:style {:flex 0}}
+        [ExpandButton {:expanded? expanded?
+                       :path path
+                       :emit-fn emit-fn}]])
      [:div {:style {:flex 1}} [:span "#{"]
       (if expanded?
         (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
