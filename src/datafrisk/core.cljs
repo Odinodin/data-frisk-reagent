@@ -8,9 +8,10 @@
                     :backgroundColor "transparent" :width "20px" :height "20px"}
             :onClick #(emit-fn (if expanded? :contract :expand) path)}
    [:svg {:viewBox "0 0 100 100"
-          :width "100%" :height "100%"}
-    [:polygon {:points (if expanded? "0,0 100,0 50,100"
-                                     "0,0 0,100 100,50") :stroke "black"}]]])
+          :width "100%" :height "100%"
+          :style {:transition "all 0.2s ease"
+                  :transform (when expanded? "rotate(90deg)")}}
+    [:polygon {:points "0,0 0,100 100,50" :stroke "black"}]]])
 
 (def styles
   {:shell {:backgroundColor "#FAFAFA"}
