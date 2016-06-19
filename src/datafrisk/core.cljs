@@ -59,7 +59,7 @@
   (let [expanded? (get expanded-paths path)]
     [:div {:style {:display "flex"}}
      (when-not (empty? data)
-       [:div {:style {:flex 0}} [ExpandButton {:expanded? expanded?
+       [:div {:style {:flex "0 1 auto"}} [ExpandButton {:expanded? expanded?
                                                :path path
                                                :emit-fn emit-fn}]])
      [:div {:style {:flex 1}}
@@ -76,7 +76,7 @@
   (let [expanded? (get expanded-paths path)]
     [:div {:style {:display "flex"}}
      (when-not (empty? data)
-       [:div {:style {:flex 0}}
+       [:div {:style {:flex "0 1 auto"}}
         [ExpandButton {:expanded? expanded?
                        :path path
                        :emit-fn emit-fn}]])
@@ -92,7 +92,7 @@
 (defn MapNode [{:keys [data path expanded-paths emit-fn]}]
   (let [expanded? (get expanded-paths path)]
     [:div {:style {:display "flex"}}
-     [:div {:style {:flex 0}}
+     [:div {:style {:flex "0 1 auto"}}
       [ExpandButton {:expanded? expanded? :path path :emit-fn emit-fn}]]
      [:div {:style {:flex 1}}
       [:span "{"]
