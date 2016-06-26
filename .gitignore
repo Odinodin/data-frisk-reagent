@@ -11,3 +11,5 @@ resources/public/js
 
 pom.xml
 pom.xml.asc
+
+.DS_Store
