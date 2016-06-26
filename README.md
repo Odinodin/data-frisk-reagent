@@ -10,7 +10,7 @@ Suitable for use during development.
 
 ## Install
 
-Add `[data-frisk-reagent "0.2.2"]` to the dev `:dependencies` in your `project.clj`
+Add `[data-frisk-reagent "0.2.3"]` to the dev `:dependencies` in your `project.clj`
 
 ## Usage
 
