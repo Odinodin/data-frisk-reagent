@@ -102,7 +102,7 @@
       [:span "{"]
       (if expanded?
         (map-indexed (fn [i x] ^{:key i} [KeyValNode {:data x :path path :expanded-paths expanded-paths :emit-fn emit-fn}]) data)
-        [:span {:style (:keywords styles)} (clojure.string/join " " (keys data))])
+        [:span {:style (:keywords styles)} (clojure.string/join " " (->> (keys data) (map pr-str)))])
       [:span "}"]]]))
 
 (defn DataFrisk [{:keys [data] :as all}]
