@@ -18,6 +18,7 @@
    :strings {:color "#4Ebb4E"}
    :keywords {:color "purple"}
    :numbers {:color "blue"}
+   :nil {:color "red"}
    :shell-visible-button {:backgroundColor "#4EE24E"}})
 
 (defn CollapseAllButton [emit-fn]
@@ -30,8 +31,11 @@
 
 (defn Node [{:keys [data path]}]
   [:div (cond
+          (nil? data)
+          [:span {:style (:nil styles)} (pr-str data)]
+
           (string? data)
-          [:span {:style (:strings styles)} (str "\"" data "\"")]
+          [:span {:style (:strings styles)} (pr-str data)]
 
           (keyword? data)
           [:span {:style (:keywords styles)} (str data)]
@@ -48,7 +52,7 @@
 (defn KeyValNode [{[k v] :data path :path expanded-paths :expanded-paths emit-fn :emit-fn}]
   [:div {:style {:display "flex"}}
    [:div {:style {:flex "0 0 auto" :padding "2px"}}
-    [:span {:style (:keywords styles)} (str k)]]
+    [Node {:data k}]]
    [:div {:style {:flex "1" :padding "2px"}}
     [DataFrisk {:data v
                 :path (conj path k)

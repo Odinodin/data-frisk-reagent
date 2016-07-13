@@ -11,7 +11,9 @@
     :c [1 2 3]
     :d '(1 2 3)
     :e #{1 2 3}
-    :f (clj->js {:i-am "an-object"})}
+    :f (clj->js {:i-am "an-object"})
+    "g" "String key"
+    0 nil}
    "root"
    (r/atom {})])
 
