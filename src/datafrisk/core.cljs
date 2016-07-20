@@ -207,7 +207,7 @@
          (when visible?
            [:div {:style {:padding "10px"
                           ;; TODO Make the max height and width adjustable
-                          :max-height "300px"
+                          :max-height "400px"
                           :max-width "800px"
                           :height "100%"
                           :box-sizing "border-box"
