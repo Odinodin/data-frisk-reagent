@@ -14,7 +14,9 @@
     [:polygon {:points "0,0 0,100 100,50" :stroke "black"}]]])
 
 (def styles
-  {:shell {:backgroundColor "#FAFAFA"}
+  {:shell {:backgroundColor "#FAFAFA"
+           :fontFamily "Consolas,Monaco,Courier New,monospace"
+           :fontSize "12px"}
    :strings {:color "#4Ebb4E"}
    :keywords {:color "purple"}
    :numbers {:color "blue"}
@@ -64,8 +66,8 @@
     [:div {:style {:display "flex"}}
      (when-not (empty? data)
        [:div {:style {:flex "0 1 auto"}} [ExpandButton {:expanded? expanded?
-                                               :path path
-                                               :emit-fn emit-fn}]])
+                                                        :path path
+                                                        :emit-fn emit-fn}]])
      [:div {:style {:flex 1}}
       [:span (if (vector? data) "[" "(")]
       (if expanded?
@@ -135,17 +137,19 @@
 
 (defn DataFriskShellVisibleButton [visible? toggle-visible-fn]
   [:button {:onClick toggle-visible-fn
-         :style (merge {:border 0
-                        :cursor "pointer"
-                        :font "inherit"
-                        :padding "12px"
-                        :position "fixed"
-                        :right 0
-                        :width "80px"
-                        :text-align "center"}
-                  (:shell-visible-button styles)
-                  (when-not visible? {:bottom 0}))}
+            :style (merge {:border 0
+                           :cursor "pointer"
+                           :font "inherit"
+                           :padding "12px"
+                           :position "fixed"
+                           :right 0
+                           :width "80px"
+                           :text-align "center"}
+                     (:shell-visible-button styles)
+                     (when-not visible? {:bottom 0}))}
    (if visible? "Hide" "Data frisk")])
+
+
 
 (defn DataFriskShell [& data]
   (let [expand-by-default (reduce #(assoc-in %1 [:data-frisk %2 :expanded-paths] #{[]}) {} (range (count data)))
@@ -154,8 +158,6 @@
       (let [data-frisk (:data-frisk @state-atom)
             visible? (:visible? data-frisk)]
         [:div {:style (merge {:position "fixed"
-                              :fontFamily "Consolas,Monaco,Courier New,monospace"
-                              :fontSize "12px"
                               :right 0
                               :bottom 0
                               :width "100%"
@@ -171,3 +173,39 @@
                         :overflow-y "scroll"}}
           (map-indexed (fn [id x]
                          ^{:key id} [Root x id state-atom]) data)]]))))
+
+
+(defn FriskInlineVisibilityButton
+  [visible? update-fn]
+  [:button {:style {:border "0"
+                    :backgroundColor "transparent" :width "20px" :height "20px"}
+            :onClick update-fn}
+   [:svg {:viewBox "0 0 100 100"
+          :width "100%" :height "100%"
+          :style {:transition "all 0.2s ease"
+                  :transform (when visible? "rotate(90deg)")}}
+    [:polygon {:points "0,0 0,100 100,50" :stroke "black"}]]])
+
+
+(defn FriskInline [& data]
+  (let [expand-by-default (reduce #(assoc-in %1 [:data-frisk %2 :expanded-paths] #{[]}) {} (range (count data)))
+        state-atom (r/atom expand-by-default)]
+    (fn [& data]
+      (let [data-frisk (:data-frisk @state-atom)
+            visible? (:visible? data-frisk)]
+        [:div {:style (merge {:padding-top "10px"
+                              :max-height (if visible? "200px" 0)
+                              :flex-flow "row nowrap"
+                              :transition "all 0.3s ease-out"
+                              :z-index "5"}
+                             (:shell styles))}
+         [FriskInlineVisibilityButton visible? (fn [_] (swap! state-atom assoc-in [:data-frisk :visible?] (not visible?)))]
+         [:span "Data frisk"]
+         [:div {:style {:padding "10px"
+                        :height "100%"
+                        :box-sizing "border-box"
+                        :overflow-y "auto"}}
+          (map-indexed (fn [id x]
+                         ^{:key id} [Root x id state-atom]) data)]]))))
+
+
