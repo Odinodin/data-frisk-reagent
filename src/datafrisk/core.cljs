@@ -193,19 +193,27 @@
     (fn [& data]
       (let [data-frisk (:data-frisk @state-atom)
             visible? (:visible? data-frisk)]
-        [:div {:style (merge {:padding-top "10px"
-                              :max-height (if visible? "200px" 0)
-                              :flex-flow "row nowrap"
+        [:div {:style (merge {:flex-flow "row nowrap"
                               :transition "all 0.3s ease-out"
                               :z-index "5"}
+                             (when-not visible?
+                               {:overflow-x "hide"
+                                :overflow-y "hide"
+                                :max-height "30px"
+                                :max-width "100px"})
                              (:shell styles))}
          [FriskInlineVisibilityButton visible? (fn [_] (swap! state-atom assoc-in [:data-frisk :visible?] (not visible?)))]
          [:span "Data frisk"]
-         [:div {:style {:padding "10px"
-                        :height "100%"
-                        :box-sizing "border-box"
-                        :overflow-y "auto"}}
-          (map-indexed (fn [id x]
-                         ^{:key id} [Root x id state-atom]) data)]]))))
+         (when visible?
+           [:div {:style {:padding "10px"
+                          ;; TODO Make the max height and width adjustable
+                          :max-height "300px"
+                          :max-width "800px"
+                          :height "100%"
+                          :box-sizing "border-box"
+                          :overflow-x "auto"
+                          :overflow-y "auto"}}
+            (map-indexed (fn [id x]
+                           ^{:key id} [Root x id state-atom]) data)])]))))
 
 
