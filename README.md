@@ -14,6 +14,15 @@ Add `[data-frisk-reagent "0.2.4"]` to the dev `:dependencies` in your `project.c
 
 ## Usage
 
+This library's public API consists of two public functions/reagent-components: `datafrisk.core/DataFriskShell` and `datafrisk.core/FriskInline`. 
+
+
+### DataFriskShell
+
+This is what you see in the gif animation above. This component renders as a single data navigation "shell" fixed to the bottom of the window. It can be expanded/hidden via a toggle at the bottom right hand corner of the screen. It's best when all the data you want to frisk is within scope within a single parent component.
+
+Example:
+
 ```clojure
 (ns datafrisk.demo
   (:require [reagent.core :as r]
@@ -35,7 +44,58 @@ Add `[data-frisk-reagent "0.2.4"]` to the dev `:dependencies` in your `project.c
     (js/document.getElementById "app")))
 ```
 
-See the dev/demo.cljs namespace for usage
+However, if you did something like:
+
+```clojure
+(ns datafrisk.demo
+  (:require [reagent.core :as r]
+            [datafrisk.core :as d]))
+            
+(defn some-component
+  [name]
+  [:div "Hi " name [d/DataFriskShell {:name name :testing 123}]])
+
+(defn mount-root []
+  (r/render
+    [:div
+     (for [x ["Bob" "Jo" "Ellen"]]
+       [some-component x])]
+    (js/document.getElementById "app")))
+```
+
+Then you'll find that one one of the `:testing` maps will end up being accessible via the shell.
+For this situation, we have the following:
+
+
+### FriskInline
+
+This component renders as a small box label "data frisk" which expands into a navigator much like that found in the shell. It's perfect for situations where you want to frisk data from multiple components (or multiple instances of the same component, as with our `some-component` example above). Here's a quick demo.
+
+
+```clojure
+(ns datafrisk.demo
+  (:require [reagent.core :as r]
+            [datafrisk.core :as d]))
+            
+(defn some-component
+  [name]
+  [:div "Hi " name [d/FriskInline {:name name :testing 123}]])
+
+(defn mount-root []
+  (r/render
+    [:div
+     (for [x ["Bob" "Jo" "Ellen"]]
+       [some-component x])]
+    (js/document.getElementById "app")))
+```
+
+Et viola!
+
+
+### For more
+
+See the dev/demo.cljs namespace for more usage of the shell.
+
 
 ## License
 
