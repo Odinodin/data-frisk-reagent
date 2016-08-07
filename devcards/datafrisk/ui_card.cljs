@@ -4,6 +4,21 @@
             [datafrisk.core :refer [Root]])
   (:require-macros [devcards.core :as dc :refer [defcard-rg]]))
 
+(defcard-rg modifiable-data
+  "When the data you are watching is swappable, you can edit it."
+  [Root
+   (r/atom 3)
+   "root"
+   (r/atom {})])
+
+(defcard-rg modifiable-nested-data
+  "When the data you are watching is nested in a swappable, you can edit the values."
+  [Root
+   (r/atom {:foo 2
+            3 "bar"})
+   "root"
+   (r/atom {})])
+
 (defcard-rg data-types
   [Root
    {:a "I'm a string"

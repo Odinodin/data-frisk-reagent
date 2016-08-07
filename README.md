@@ -10,11 +10,11 @@ Suitable for use during development.
 
 ## Install
 
-Add `[data-frisk-reagent "0.2.4"]` to the dev `:dependencies` in your `project.clj`
+Add `[data-frisk-reagent "0.2.6"]` to the dev `:dependencies` in your `project.clj`
 
 ## Usage
 
-This library's public API consists of two public functions/reagent-components: `datafrisk.core/DataFriskShell` and `datafrisk.core/FriskInline`. 
+This library's public API consists of two public functions/reagent-components: `datafrisk.core/DataFriskShell` and `datafrisk.core/FriskInline`.
 
 
 ### DataFriskShell
@@ -50,7 +50,7 @@ However, if you did something like:
 (ns datafrisk.demo
   (:require [reagent.core :as r]
             [datafrisk.core :as d]))
-            
+
 (defn some-component
   [name]
   [:div "Hi " name [d/DataFriskShell {:name name :testing 123}]])
@@ -76,7 +76,7 @@ This component renders as a small box label "data frisk" which expands into a na
 (ns datafrisk.demo
   (:require [reagent.core :as r]
             [datafrisk.core :as d]))
-            
+
 (defn some-component
   [name]
   [:div "Hi " name [d/FriskInline {:name name :testing 123}]])
