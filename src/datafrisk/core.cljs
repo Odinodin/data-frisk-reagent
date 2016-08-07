@@ -39,7 +39,7 @@
           (string? data)
           (if swappable
             [:input {:type "text"
-                     :value (str data)
+                     :default-value (str data)
                      :on-change
                      (fn string-changed [e]
                        (emit-fn :changed path (.. e -target -value)))}]
@@ -48,7 +48,7 @@
           (keyword? data)
           (if swappable
             [:input {:type "text"
-                     :value (name data)
+                     :default-value (name data)
                      :on-change
                      (fn keyword-changed [e]
                        (emit-fn :changed path (keyword (.. e -target -value))))}]
@@ -60,7 +60,7 @@
           (number? data)
           (if swappable
             [:input {:type "number"
-                     :value data
+                     :default-value data
                      :on-change
                      (fn number-changed [e]
                        (emit-fn :changed path (js/Number (.. e -target -value))))}]
