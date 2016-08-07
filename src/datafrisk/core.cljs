@@ -4,7 +4,7 @@
 (declare DataFrisk)
 
 (defn ExpandButton [{:keys [expanded? path emit-fn]}]
-  [:button {:style {:border "0"
+  [:button {:style {:border 0
                     :backgroundColor "transparent" :width "20px" :height "20px"}
             :onClick #(emit-fn (if expanded? :contract :expand) path)}
    [:svg {:viewBox "0 0 100 100"
@@ -206,7 +206,7 @@
 
 (defn FriskInlineVisibilityButton
   [visible? update-fn]
-  [:button {:style {:border "0"
+  [:button {:style {:border 0
                     :backgroundColor "transparent" :width "20px" :height "20px"}
             :onClick update-fn}
    [:svg {:viewBox "0 0 100 100"
