@@ -31,37 +31,55 @@
                     :backgroundColor "lightgray"}}
    "Collapse all"])
 
-(defn Node [{:keys [data path]}]
+(defn Node [{:keys [data path emit-fn swappable]}]
   [:div (cond
           (nil? data)
           [:span {:style (:nil styles)} (pr-str data)]
 
           (string? data)
-          [:span {:style (:strings styles)} (pr-str data)]
+          (if swappable
+            [:input {:type "text"
+                     :value (str data)
+                     :on-change
+                     (fn string-changed [e]
+                       (emit-fn :changed path (.. e -target -value)))}]
+            [:span {:style (:strings styles)} (pr-str data)])
 
           (keyword? data)
-          [:span {:style (:keywords styles)} (str data)]
+          (if swappable
+            [:input {:type "text"
+                     :value (name data)
+                     :on-change
+                     (fn keyword-changed [e]
+                       (emit-fn :changed path (keyword (.. e -target -value))))}]
+            [:span {:style (:keywords styles)} (str data)])
 
           (object? data)
           (str data " " (.stringify js/JSON data))
 
           (number? data)
-          [:span {:style (:numbers styles)} data]
-
+          (if swappable
+            [:input {:type "number"
+                     :value data
+                     :on-change
+                     (fn number-changed [e]
+                       (emit-fn :changed path (js/Number (.. e -target -value))))}]
+            [:span {:style (:numbers styles)} data])
           :else
           (str data))])
 
-(defn KeyValNode [{[k v] :data path :path expanded-paths :expanded-paths emit-fn :emit-fn}]
+(defn KeyValNode [{[k v] :data :keys [path expanded-paths emit-fn swappable]}]
   [:div {:style {:display "flex"}}
    [:div {:style {:flex "0 0 auto" :padding "2px"}}
     [Node {:data k}]]
    [:div {:style {:flex "1" :padding "2px"}}
     [DataFrisk {:data v
+                :swappable swappable
                 :path (conj path k)
                 :expanded-paths expanded-paths
                 :emit-fn emit-fn}]]])
 
-(defn ListVecNode [{:keys [data path expanded-paths emit-fn]}]
+(defn ListVecNode [{:keys [data path expanded-paths emit-fn swappable]}]
   (let [expanded? (get expanded-paths path)]
     [:div {:style {:display "flex"}}
      (when-not (empty? data)
@@ -72,13 +90,14 @@
       [:span (if (vector? data) "[" "(")]
       (if expanded?
         (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
+                                                     :swappable swappable
                                                      :path (conj path i)
                                                      :expanded-paths expanded-paths
                                                      :emit-fn emit-fn}]) data)
         (str (count data) " items"))
       [:span (if (vector? data) "]" ")")]]]))
 
-(defn SetNode [{:keys [data path expanded-paths emit-fn]}]
+(defn SetNode [{:keys [data path expanded-paths emit-fn swappable]}]
   (let [expanded? (get expanded-paths path)]
     [:div {:style {:display "flex"}}
      (when-not (empty? data)
@@ -89,21 +108,24 @@
      [:div {:style {:flex 1}} [:span "#{"]
       (if expanded?
         (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
+                                                     :swappable swappable
                                                      :path (conj path x)
                                                      :expanded-paths expanded-paths
                                                      :emit-fn emit-fn}]) data)
         (str (count data) " items"))
       [:span "}"]]]))
 
-(defn MapNode [{:keys [data path expanded-paths emit-fn]}]
+(defn MapNode [{:keys [data path expanded-paths emit-fn] :as all}]
   (let [expanded? (get expanded-paths path)]
     [:div {:style {:display "flex"}}
      [:div {:style {:flex "0 1 auto"}}
-      [ExpandButton {:expanded? expanded? :path path :emit-fn emit-fn}]]
+      [ExpandButton {:expanded? expanded?
+                     :path path
+                     :emit-fn emit-fn}]]
      [:div {:style {:flex 1}}
       [:span "{"]
       (if expanded?
-        (map-indexed (fn [i x] ^{:key i} [KeyValNode {:data x :path path :expanded-paths expanded-paths :emit-fn emit-fn}]) data)
+        (map-indexed (fn [i x] ^{:key i} [KeyValNode (assoc all :data x)]) data)
         [:span {:style (:keywords styles)} (clojure.string/join " " (->> (keys data) (map pr-str)))])
       [:span "}"]]]))
 
@@ -117,20 +139,24 @@
 (defn conj-to-set [coll x]
   (conj (or coll #{}) x))
 
-(defn emit-fn-factory [data-atom id]
+(defn emit-fn-factory [state-atom id swappable]
   (fn [event & args]
     (prn "Emit: " id event args)
     (case event
-      :expand (swap! data-atom update-in [:data-frisk id :expanded-paths] conj-to-set (first args))
-      :contract (swap! data-atom update-in [:data-frisk id :expanded-paths] disj (first args))
-      :collapse-all (swap! data-atom assoc-in [:data-frisk id :expanded-paths] #{}))))
+      :expand (swap! state-atom update-in [:data-frisk id :expanded-paths] conj-to-set (first args))
+      :contract (swap! state-atom update-in [:data-frisk id :expanded-paths] disj (first args))
+      :collapse-all (swap! state-atom assoc-in [:data-frisk id :expanded-paths] #{})
+      :changed (apply swap! swappable assoc-in args))))
 
 (defn Root [data id state-atom]
   (let [data-frisk (:data-frisk @state-atom)
-        emit-fn (emit-fn-factory state-atom id)]
+        swappable (when (satisfies? IAtom data)
+                    data)
+        emit-fn (emit-fn-factory state-atom id swappable)]
     [:div
      [CollapseAllButton emit-fn]
      [DataFrisk {:data data
+                 :swappable swappable
                  :path []
                  :expanded-paths (get-in data-frisk [id :expanded-paths])
                  :emit-fn emit-fn}]]))
