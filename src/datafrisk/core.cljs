@@ -146,7 +146,10 @@
       :expand (swap! state-atom update-in [:data-frisk id :expanded-paths] conj-to-set (first args))
       :contract (swap! state-atom update-in [:data-frisk id :expanded-paths] disj (first args))
       :collapse-all (swap! state-atom assoc-in [:data-frisk id :expanded-paths] #{})
-      :changed (apply swap! swappable assoc-in args))))
+      :changed (let [[path value] args]
+                 (if (seq path)
+                   (swap! swappable assoc-in path value)
+                   (reset! swappable value))))))
 
 (defn Root [data id state-atom]
   (let [data-frisk (:data-frisk @state-atom)
