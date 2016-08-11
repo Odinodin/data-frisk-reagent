@@ -63,7 +63,7 @@ However, if you did something like:
     (js/document.getElementById "app")))
 ```
 
-Then you'll find that one one of the `:testing` maps will end up being accessible via the shell.
+Then you'll find that one of the `:testing` maps will end up being accessible via the shell.
 For this situation, we have the following:
 
 
