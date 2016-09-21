@@ -91,6 +91,45 @@ This component renders as a small box label "data frisk" which expands into a na
 
 Et viola!
 
+### Use with re-frame
+
+This example uses [re-frame](https://github.com/Day8/re-frame) to display a data-frisk component displaying the current app database:
+
+```clojure
+(ns datafrisk.re-frame-example
+  (:require [reagent.core :as r]
+            [datafrisk.core :as d]
+            [re-frame.core :refer [subscribe reg-sub]]))
+
+;; Set up a subscription
+(defn- app-db-subscription
+  "Subscribe to any change in the app db under the path"
+  [db [_ path]]
+  (get-in db path))
+(reg-sub :debug/everything app-db-subscription)
+
+;; Define a form-2 component
+(defn frisk
+  [& path]
+  (let [everything (subscribe [:debug/everything path])]
+    (fn [& path]
+      [d/DataFriskShell @everything])))
+
+;; Now you can use the component thusly:
+
+(defn mount-root []
+  (r/render
+    [:div
+     [:h1 "Welcome to ZomboCom"]
+
+     ;; This displays the entire app database:
+     [frisk]
+
+     ;; This displays everything under a specific subtree:
+     [frisk :subtree :that :interests-me]]
+
+    (js/document.getElementById "app")))
+```
 
 ### For more
 
