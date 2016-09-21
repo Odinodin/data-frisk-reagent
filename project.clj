@@ -6,8 +6,7 @@
   :min-lein-version "2.6.1"
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.7.228"]
-                 [reagent "0.6.0-alpha" :exclusions [cljsjs/react]]
-                 [cljsjs/react-with-addons "0.14.3-0"]]
+                 [reagent "0.6.0"]]
   :plugins [[lein-figwheel "0.5.2"]
             [lein-cljsbuild "1.1.3" :exclusions [[org.clojure/clojure]]]]
   :source-paths ["src"]
