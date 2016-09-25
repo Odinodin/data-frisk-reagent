@@ -53,3 +53,10 @@
          :list '()}
    "root"
    (r/atom {:data-frisk {"root" {:expanded-paths #{[]}}}})])
+
+(defcard-rg nil-in-collections
+  [Root {:set #{nil}
+         :vec [nil]
+         :list '(nil nil)}
+   "root"
+   (r/atom {:data-frisk {"root" {:expanded-paths #{[] [:set] [:vec] [:list]}}}})])
