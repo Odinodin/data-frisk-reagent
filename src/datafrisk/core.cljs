@@ -141,7 +141,6 @@
 
 (defn emit-fn-factory [state-atom id swappable]
   (fn [event & args]
-    (prn "Emit: " id event args)
     (case event
       :expand (swap! state-atom update-in [:data-frisk id :expanded-paths] conj-to-set (first args))
       :contract (swap! state-atom update-in [:data-frisk id :expanded-paths] disj (first args))
