@@ -31,10 +31,22 @@
                     :backgroundColor "lightgray"}}
    "Collapse all"])
 
+(defn NilText []
+  [:span {:style (:nil styles)} (pr-str nil)])
+
+(defn StringText [data]
+  [:span {:style (:strings styles)} (pr-str data)])
+
+(defn KeywordText [data]
+  [:span {:style (:keywords styles)} (str data)])
+
+(defn NumberText [data]
+  [:span {:style (:numbers styles)} data])
+
 (defn Node [{:keys [data path emit-fn swappable]}]
   [:div (cond
           (nil? data)
-          [:span {:style (:nil styles)} (pr-str data)]
+          [NilText]
 
           (string? data)
           (if swappable
@@ -43,7 +55,7 @@
                      :on-change
                      (fn string-changed [e]
                        (emit-fn :changed path (.. e -target -value)))}]
-            [:span {:style (:strings styles)} (pr-str data)])
+            [StringText data])
 
           (keyword? data)
           (if swappable
@@ -52,7 +64,7 @@
                      :on-change
                      (fn keyword-changed [e]
                        (emit-fn :changed path (keyword (.. e -target -value))))}]
-            [:span {:style (:keywords styles)} (str data)])
+            [KeywordText data])
 
           (object? data)
           (str data " " (.stringify js/JSON data))
@@ -64,7 +76,7 @@
                      :on-change
                      (fn number-changed [e]
                        (emit-fn :changed path (js/Number (.. e -target -value))))}]
-            [:span {:style (:numbers styles)} data])
+            [NumberText data])
           :else
           (str data))])
 
@@ -115,6 +127,17 @@
         (str (count data) " items"))
       [:span "}"]]]))
 
+(defn KeySet [keyset]
+  [:span
+   (->> (map-indexed
+          (fn [i data] ^{:key i} [:span
+                                  (cond (nil? data) [NilText]
+                                        (string? data) [StringText data]
+                                        (keyword? data) [KeywordText data]
+                                        (number? data) [NumberText data]
+                                        :else (str data))]) keyset)
+        (interpose " "))])
+
 (defn MapNode [{:keys [data path expanded-paths emit-fn] :as all}]
   (let [expanded? (get expanded-paths path)]
     [:div {:style {:display "flex"}}
@@ -126,7 +149,7 @@
       [:span "{"]
       (if expanded?
         (map-indexed (fn [i x] ^{:key i} [KeyValNode (assoc all :data x)]) data)
-        [:span {:style (:keywords styles)} (clojure.string/join " " (->> (keys data) (map pr-str)))])
+        [KeySet (keys data)])
       [:span "}"]]]))
 
 (defn DataFrisk [{:keys [data] :as all}]
