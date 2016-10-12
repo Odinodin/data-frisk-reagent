@@ -16,7 +16,8 @@
 (def styles
   {:shell {:backgroundColor "#FAFAFA"
            :fontFamily "Consolas,Monaco,Courier New,monospace"
-           :fontSize "12px"}
+           :fontSize "12px"
+           :z-index 9999}
    :strings {:color "#4Ebb4E"}
    :keywords {:color "purple"}
    :numbers {:color "blue"}
