@@ -208,14 +208,8 @@
 (defn emit-fn-factory [state-atom id swappable]
   (fn [event & args]
     (case event
-      :expand (do
-                (swap! state-atom update-in [:data-frisk id :expanded-paths] conj-to-set (first args))
-                (println "Expnded: " (get-in @state-atom [:data-frisk id :expanded-paths])))
-
-      :expand-all (do
-                    (println "args" args)
-                    (println "Expand all!" (expand-all-paths (first args)))
-                    (swap! state-atom assoc-in [:data-frisk id :expanded-paths] (expand-all-paths (first args))))
+      :expand (swap! state-atom update-in [:data-frisk id :expanded-paths] conj-to-set (first args))
+      :expand-all (swap! state-atom assoc-in [:data-frisk id :expanded-paths] (expand-all-paths (first args)))
       :contract (swap! state-atom update-in [:data-frisk id :expanded-paths] disj (first args))
       :collapse-all (swap! state-atom assoc-in [:data-frisk id :expanded-paths] #{})
       :changed (let [[path value] args]
