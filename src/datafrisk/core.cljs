@@ -24,18 +24,18 @@
    :nil {:color "red"}
    :shell-visible-button {:backgroundColor "#4EE24E"}})
 
-(defn CollapseAllButton [emit-fn]
-  [:button {:onClick #(emit-fn :collapse-all)
+(defn ExpandAllButton [emit-fn data]
+  [:button {:onClick #(emit-fn :expand-all data)
             :style {:padding "3px"
                     :borderTopLeftRadius "2px"
                     :borderBottomLeftRadius "2px"
                     :cursor "pointer"
                     :border "1px solid darkgray"
                     :backgroundColor "white"}}
-   "Collapse all"])
+   "Expand all"])
 
-(defn ExpandAllButton [emit-fn data]
-  [:button {:onClick #(emit-fn :expand-all data)
+(defn CollapseAllButton [emit-fn data]
+  [:button {:onClick #(emit-fn :collapse-all)
             :style {:padding "3px"
                     :cursor "pointer"
                     :borderTopRightRadius "2px"
@@ -45,7 +45,7 @@
                     :borderRight "1px solid darkgray"
                     :borderLeft "0"
                     :backgroundColor "white"}}
-   "Expand all"])
+   "Collapse all"])
 
 (defn NilText []
   [:span {:style (:nil styles)} (pr-str nil)])
