@@ -26,18 +26,25 @@
 
 (defn CollapseAllButton [emit-fn]
   [:button {:onClick #(emit-fn :collapse-all)
-            :style {:padding "7px"
+            :style {:padding "3px"
+                    :borderTopLeftRadius "2px"
+                    :borderBottomLeftRadius "2px"
                     :cursor "pointer"
-                    :border 1
-                    :backgroundColor "lightgray"}}
+                    :border "1px solid darkgray"
+                    :backgroundColor "white"}}
    "Collapse all"])
 
 (defn ExpandAllButton [emit-fn data]
   [:button {:onClick #(emit-fn :expand-all data)
-            :style {:padding "7px"
+            :style {:padding "3px"
                     :cursor "pointer"
-                    :border 1
-                    :backgroundColor "lightgray"}}
+                    :borderTopRightRadius "2px"
+                    :borderBottomRightRadius "2px"
+                    :borderTop "1px solid darkgray"
+                    :borderBottom "1px solid darkgray"
+                    :borderRight "1px solid darkgray"
+                    :borderLeft "0"
+                    :backgroundColor "white"}}
    "Expand all"])
 
 (defn NilText []
@@ -222,8 +229,9 @@
                     data)
         emit-fn (emit-fn-factory state-atom id swappable)]
     [:div
-     [CollapseAllButton emit-fn]
-     [ExpandAllButton emit-fn data]
+     [:div {:style {:padding "4px 2px"}}
+      [ExpandAllButton emit-fn data]
+      [CollapseAllButton emit-fn]]
      [DataFrisk {:data data
                  :swappable swappable
                  :path []
