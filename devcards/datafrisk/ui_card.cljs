@@ -28,7 +28,9 @@
     :e #{1 2 3}
     :f (clj->js {:i-am "an-object"})
     "g" "String key"
-    0 nil}
+    0 nil
+    "not a number" js/NaN
+    }
    "root"
    (r/atom {})])
 

@@ -32,6 +32,14 @@
                     :backgroundColor "lightgray"}}
    "Collapse all"])
 
+(defn ExpandAllButton [emit-fn data]
+  [:button {:onClick #(emit-fn :expand-all data)
+            :style {:padding "7px"
+                    :cursor "pointer"
+                    :border 1
+                    :backgroundColor "lightgray"}}
+   "Expand all"])
+
 (defn NilText []
   [:span {:style (:nil styles)} (pr-str nil)])
 
@@ -163,10 +171,44 @@
 (defn conj-to-set [coll x]
   (conj (or coll #{}) x))
 
+(defn expand-all-paths [root-value]
+  (loop [remaining [{:path [] :node root-value}]
+         expanded-paths #{}]
+    (if (seq remaining)
+      (let [[current & rest] remaining]
+        (cond (map? (:node current))
+              (recur
+                (concat rest (map (fn [[k v]] {:path (conj (:path current) k)
+                                               :node v})
+                                  (:node current)))
+                (conj expanded-paths (:path current)))
+
+              (or (seq? (:node current)) (vector? (:node current)))
+              (recur
+                (concat rest (map-indexed (fn [i node] {:path (conj (:path current) i)
+                                                        :node node})
+                               (:node current)))
+                (conj expanded-paths (:path current)))
+
+              :else
+              (recur
+                rest
+                (if (coll? (:node current))
+                  (conj expanded-paths (:path current))
+                  expanded-paths))))
+      expanded-paths)))
+
 (defn emit-fn-factory [state-atom id swappable]
   (fn [event & args]
     (case event
-      :expand (swap! state-atom update-in [:data-frisk id :expanded-paths] conj-to-set (first args))
+      :expand (do
+                (swap! state-atom update-in [:data-frisk id :expanded-paths] conj-to-set (first args))
+                (println "Expnded: " (get-in @state-atom [:data-frisk id :expanded-paths])))
+
+      :expand-all (do
+                    (println "args" args)
+                    (println "Expand all!" (expand-all-paths (first args)))
+                    (swap! state-atom assoc-in [:data-frisk id :expanded-paths] (expand-all-paths (first args))))
       :contract (swap! state-atom update-in [:data-frisk id :expanded-paths] disj (first args))
       :collapse-all (swap! state-atom assoc-in [:data-frisk id :expanded-paths] #{})
       :changed (let [[path value] args]
@@ -181,6 +223,7 @@
         emit-fn (emit-fn-factory state-atom id swappable)]
     [:div
      [CollapseAllButton emit-fn]
+     [ExpandAllButton emit-fn data]
      [DataFrisk {:data data
                  :swappable swappable
                  :path []
@@ -200,8 +243,6 @@
                      (:shell-visible-button styles)
                      (when-not visible? {:bottom 0}))}
    (if visible? "Hide" "Data frisk")])
-
-
 
 (defn DataFriskShell [& data]
   (let [expand-by-default (reduce #(assoc-in %1 [:data-frisk %2 :expanded-paths] #{[]}) {} (range (count data)))
@@ -226,7 +267,6 @@
           (map-indexed (fn [id x]
                          ^{:key id} [Root x id state-atom]) data)]]))))
 
-
 (defn FriskInlineVisibilityButton
   [visible? update-fn]
   [:button {:style {:border 0
@@ -237,7 +277,6 @@
           :style {:transition "all 0.2s ease"
                   :transform (when visible? "rotate(90deg)")}}
     [:polygon {:points "0,0 0,100 100,50" :stroke "black"}]]])
-
 
 (defn FriskInline [& data]
   (let [expand-by-default (reduce #(assoc-in %1 [:data-frisk %2 :expanded-paths] #{[]}) {} (range (count data)))
