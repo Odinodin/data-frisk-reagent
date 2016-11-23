@@ -28,7 +28,9 @@
     :e #{1 2 3}
     :f (clj->js {:i-am "an-object"})
     "g" "String key"
-    0 nil}
+    0 nil
+    "not a number" js/NaN
+    }
    "root"
    (r/atom {})])
 
@@ -53,3 +55,10 @@
          :list '()}
    "root"
    (r/atom {:data-frisk {"root" {:expanded-paths #{[]}}}})])
+
+(defcard-rg nil-in-collections
+  [Root {:set #{nil}
+         :vec [nil]
+         :list '(nil nil)}
+   "root"
+   (r/atom {:data-frisk {"root" {:expanded-paths #{[] [:set] [:vec] [:list]}}}})])

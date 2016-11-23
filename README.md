@@ -10,7 +10,9 @@ Suitable for use during development.
 
 ## Install
 
-Add `[data-frisk-reagent "0.2.6"]` to the dev `:dependencies` in your `project.clj`
+![](https://clojars.org/data-frisk-reagent/latest-version.svg)
+
+Add `data-frisk-reagent` to the dev `:dependencies` in your `project.clj`
 
 ## Usage
 

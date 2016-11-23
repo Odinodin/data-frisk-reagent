@@ -16,25 +16,53 @@
 (def styles
   {:shell {:backgroundColor "#FAFAFA"
            :fontFamily "Consolas,Monaco,Courier New,monospace"
-           :fontSize "12px"}
+           :fontSize "12px"
+           :z-index 9999}
    :strings {:color "#4Ebb4E"}
    :keywords {:color "purple"}
    :numbers {:color "blue"}
    :nil {:color "red"}
    :shell-visible-button {:backgroundColor "#4EE24E"}})
 
-(defn CollapseAllButton [emit-fn]
-  [:button {:onClick #(emit-fn :collapse-all)
-            :style {:padding "7px"
+(defn ExpandAllButton [emit-fn data]
+  [:button {:onClick #(emit-fn :expand-all data)
+            :style {:padding "3px"
+                    :borderTopLeftRadius "2px"
+                    :borderBottomLeftRadius "2px"
                     :cursor "pointer"
-                    :border 1
-                    :backgroundColor "lightgray"}}
+                    :border "1px solid darkgray"
+                    :backgroundColor "white"}}
+   "Expand all"])
+
+(defn CollapseAllButton [emit-fn data]
+  [:button {:onClick #(emit-fn :collapse-all)
+            :style {:padding "3px"
+                    :cursor "pointer"
+                    :borderTopRightRadius "2px"
+                    :borderBottomRightRadius "2px"
+                    :borderTop "1px solid darkgray"
+                    :borderBottom "1px solid darkgray"
+                    :borderRight "1px solid darkgray"
+                    :borderLeft "0"
+                    :backgroundColor "white"}}
    "Collapse all"])
+
+(defn NilText []
+  [:span {:style (:nil styles)} (pr-str nil)])
+
+(defn StringText [data]
+  [:span {:style (:strings styles)} (pr-str data)])
+
+(defn KeywordText [data]
+  [:span {:style (:keywords styles)} (str data)])
+
+(defn NumberText [data]
+  [:span {:style (:numbers styles)} data])
 
 (defn Node [{:keys [data path emit-fn swappable]}]
   [:div (cond
           (nil? data)
-          [:span {:style (:nil styles)} (pr-str data)]
+          [NilText]
 
           (string? data)
           (if swappable
@@ -43,7 +71,7 @@
                      :on-change
                      (fn string-changed [e]
                        (emit-fn :changed path (.. e -target -value)))}]
-            [:span {:style (:strings styles)} (pr-str data)])
+            [StringText data])
 
           (keyword? data)
           (if swappable
@@ -52,7 +80,7 @@
                      :on-change
                      (fn keyword-changed [e]
                        (emit-fn :changed path (keyword (.. e -target -value))))}]
-            [:span {:style (:keywords styles)} (str data)])
+            [KeywordText data])
 
           (object? data)
           (str data " " (.stringify js/JSON data))
@@ -64,7 +92,7 @@
                      :on-change
                      (fn number-changed [e]
                        (emit-fn :changed path (js/Number (.. e -target -value))))}]
-            [:span {:style (:numbers styles)} data])
+            [NumberText data])
           :else
           (str data))])
 
@@ -115,6 +143,17 @@
         (str (count data) " items"))
       [:span "}"]]]))
 
+(defn KeySet [keyset]
+  [:span
+   (->> (map-indexed
+          (fn [i data] ^{:key i} [:span
+                                  (cond (nil? data) [NilText]
+                                        (string? data) [StringText data]
+                                        (keyword? data) [KeywordText data]
+                                        (number? data) [NumberText data]
+                                        :else (str data))]) keyset)
+        (interpose " "))])
+
 (defn MapNode [{:keys [data path expanded-paths emit-fn] :as all}]
   (let [expanded? (get expanded-paths path)]
     [:div {:style {:display "flex"}}
@@ -126,7 +165,7 @@
       [:span "{"]
       (if expanded?
         (map-indexed (fn [i x] ^{:key i} [KeyValNode (assoc all :data x)]) data)
-        [:span {:style (:keywords styles)} (clojure.string/join " " (->> (keys data) (map pr-str)))])
+        [KeySet (keys data)])
       [:span "}"]]]))
 
 (defn DataFrisk [{:keys [data] :as all}]
@@ -139,10 +178,38 @@
 (defn conj-to-set [coll x]
   (conj (or coll #{}) x))
 
+(defn expand-all-paths [root-value]
+  (loop [remaining [{:path [] :node root-value}]
+         expanded-paths #{}]
+    (if (seq remaining)
+      (let [[current & rest] remaining]
+        (cond (map? (:node current))
+              (recur
+                (concat rest (map (fn [[k v]] {:path (conj (:path current) k)
+                                               :node v})
+                                  (:node current)))
+                (conj expanded-paths (:path current)))
+
+              (or (seq? (:node current)) (vector? (:node current)))
+              (recur
+                (concat rest (map-indexed (fn [i node] {:path (conj (:path current) i)
+                                                        :node node})
+                               (:node current)))
+                (conj expanded-paths (:path current)))
+
+              :else
+              (recur
+                rest
+                (if (coll? (:node current))
+                  (conj expanded-paths (:path current))
+                  expanded-paths))))
+      expanded-paths)))
+
 (defn emit-fn-factory [state-atom id swappable]
   (fn [event & args]
     (case event
       :expand (swap! state-atom update-in [:data-frisk id :expanded-paths] conj-to-set (first args))
+      :expand-all (swap! state-atom assoc-in [:data-frisk id :expanded-paths] (expand-all-paths (first args)))
       :contract (swap! state-atom update-in [:data-frisk id :expanded-paths] disj (first args))
       :collapse-all (swap! state-atom assoc-in [:data-frisk id :expanded-paths] #{})
       :changed (let [[path value] args]
@@ -156,7 +223,9 @@
                     data)
         emit-fn (emit-fn-factory state-atom id swappable)]
     [:div
-     [CollapseAllButton emit-fn]
+     [:div {:style {:padding "4px 2px"}}
+      [ExpandAllButton emit-fn data]
+      [CollapseAllButton emit-fn]]
      [DataFrisk {:data data
                  :swappable swappable
                  :path []
@@ -176,8 +245,6 @@
                      (:shell-visible-button styles)
                      (when-not visible? {:bottom 0}))}
    (if visible? "Hide" "Data frisk")])
-
-
 
 (defn DataFriskShell [& data]
   (let [expand-by-default (reduce #(assoc-in %1 [:data-frisk %2 :expanded-paths] #{[]}) {} (range (count data)))
@@ -202,7 +269,6 @@
           (map-indexed (fn [id x]
                          ^{:key id} [Root x id state-atom]) data)]]))))
 
-
 (defn FriskInlineVisibilityButton
   [visible? update-fn]
   [:button {:style {:border 0
@@ -213,7 +279,6 @@
           :style {:transition "all 0.2s ease"
                   :transform (when visible? "rotate(90deg)")}}
     [:polygon {:points "0,0 0,100 100,50" :stroke "black"}]]])
-
 
 (defn FriskInline [& data]
   (let [expand-by-default (reduce #(assoc-in %1 [:data-frisk %2 :expanded-paths] #{[]}) {} (range (count data)))
