@@ -182,25 +182,24 @@
   (loop [remaining [{:path [] :node root-value}]
          expanded-paths #{}]
     (if (seq remaining)
-      (let [[current & rest] remaining]
-        (cond (map? (:node current))
+      (let [[current & rest] remaining
+            current-node (if (satisfies? IDeref (:node current)) @(:node current) (:node current))]
+        (cond (map? current-node)
               (recur
                 (concat rest (map (fn [[k v]] {:path (conj (:path current) k)
                                                :node v})
-                                  (:node current)))
+                                  current-node))
                 (conj expanded-paths (:path current)))
-
-              (or (seq? (:node current)) (vector? (:node current)))
+              (or (seq? current-node) (vector? current-node))
               (recur
                 (concat rest (map-indexed (fn [i node] {:path (conj (:path current) i)
                                                         :node node})
-                               (:node current)))
+                               current-node))
                 (conj expanded-paths (:path current)))
-
               :else
               (recur
                 rest
-                (if (coll? (:node current))
+                (if (coll? current-node)
                   (conj expanded-paths (:path current))
                   expanded-paths))))
       expanded-paths)))
