@@ -11,12 +11,13 @@
 
 (defn mount-root []
   (let [data {:animals '({:animal "Monkey", :age 2}
-                         {:animal "Giraffe", :age 4}
-                         {:animal "Zebra" :age 3})
+                          {:animal "Giraffe", :age 4}
+                          {:animal "Zebra" :age 3})
               :some-string "a"
               :vector-with-map [1 2 3 3 {:a "a" :b "b"}]
               :a-set #{1 2 3}
               :a-map {:x "x" :y "y" :z [1 2 3 4]}
+              :atom (atom {:x "x" :y "y" :z [1 2 3 4]})
               :a-seq (seq [1 2])
               :an-object (clj->js {:a "a"})
               :this-is-a-very-long-keyword :g}]
