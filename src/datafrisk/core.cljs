@@ -245,28 +245,30 @@
                      (when-not visible? {:bottom 0}))}
    (if visible? "Hide" "Data frisk")])
 
+(defn DataFriskShellView [shell-state & data]
+  (let [visible? (:shell-visible? @shell-state)]
+    [:div {:style (merge {:position "fixed"
+                          :right 0
+                          :bottom 0
+                          :width "100%"
+                          :height "50%"
+                          :max-height (if visible? "50%" 0)
+                          :transition "all 0.3s ease-out"
+                          :padding 0}
+                         (:shell styles))}
+     [DataFriskShellVisibleButton visible? (fn [_] (swap! shell-state assoc :shell-visible? (not visible?)))]
+     [:div {:style {:padding "10px"
+                    :height "100%"
+                    :box-sizing "border-box"
+                    :overflow-y "scroll"}}
+      (map-indexed (fn [id x]
+                     ^{:key id} [Root x id shell-state]) data)]]))
+
 (defn DataFriskShell [& data]
   (let [expand-by-default (reduce #(assoc-in %1 [:data-frisk %2 :expanded-paths] #{[]}) {} (range (count data)))
-        state-atom (r/atom expand-by-default)]
+        shell-state (r/atom expand-by-default)]
     (fn [& data]
-      (let [data-frisk (:data-frisk @state-atom)
-            visible? (:visible? data-frisk)]
-        [:div {:style (merge {:position "fixed"
-                              :right 0
-                              :bottom 0
-                              :width "100%"
-                              :height "50%"
-                              :max-height (if visible? "50%" 0)
-                              :transition "all 0.3s ease-out"
-                              :padding 0}
-                        (:shell styles))}
-         [DataFriskShellVisibleButton visible? (fn [_] (swap! state-atom assoc-in [:data-frisk :visible?] (not visible?)))]
-         [:div {:style {:padding "10px"
-                        :height "100%"
-                        :box-sizing "border-box"
-                        :overflow-y "scroll"}}
-          (map-indexed (fn [id x]
-                         ^{:key id} [Root x id state-atom]) data)]]))))
+      (apply DataFriskShellView shell-state data))))
 
 (defn FriskInlineVisibilityButton
   [visible? update-fn]
