@@ -12,7 +12,8 @@
             [lein-cljsbuild "1.1.3" :exclusions [[org.clojure/clojure]]]]
   :source-paths ["src"]
 
-  :figwheel {:http-server-root "public"}
+  :figwheel {:http-server-root "public"
+             :server-port 3999}
 
   :aliases {"testing" ["do" ["clean"] ["doo" "phantom" "test" "once"]]}
 
