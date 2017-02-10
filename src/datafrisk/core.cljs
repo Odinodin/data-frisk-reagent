@@ -5,7 +5,10 @@
 
 (defn ExpandButton [{:keys [expanded? path emit-fn]}]
   [:button {:style {:border 0
-                    :backgroundColor "transparent" :width "20px" :height "20px"}
+                    :textAlign "center"
+                    :backgroundColor "transparent"
+                    :width "20px"
+                    :height "20px"}
             :onClick #(emit-fn (if expanded? :contract :expand) path)}
    [:svg {:viewBox "0 0 100 100"
           :width "100%" :height "100%"
@@ -59,6 +62,19 @@
 (defn NumberText [data]
   [:span {:style (:numbers styles)} data])
 
+(defn KeySet [keyset]
+  [:span
+   (->> keyset
+        (sort-by (partial str))
+        (map-indexed
+          (fn [i data] ^{:key i} [:span
+                                  (cond (nil? data) [NilText]
+                                        (string? data) [StringText data]
+                                        (keyword? data) [KeywordText data]
+                                        (number? data) [NumberText data]
+                                        :else (str data))]))
+        (interpose " "))])
+
 (defn Node [{:keys [data path emit-fn swappable]}]
   [:div (cond
           (nil? data)
@@ -96,84 +112,124 @@
           :else
           (str data))])
 
-(defn KeyValNode [{[k v] :data :keys [path expanded-paths emit-fn swappable]}]
-  [:div {:style {:display "flex"}}
-   [:div {:style {:flex "0 0 auto" :padding "2px"}}
-    [Node {:data k}]]
-   [:div {:style {:flex "1" :padding "2px"}}
-    [DataFrisk {:data v
-                :swappable swappable
-                :path (conj path k)
-                :expanded-paths expanded-paths
-                :emit-fn emit-fn}]]])
+(defn expandable? [v]
+  (or (map? v) (seq? v) (coll? v)))
 
-(defn ListVecNode [{:keys [data path expanded-paths emit-fn swappable]}]
+(defn CollectionSummary [{:keys [data]}]
+  (cond (map? data) [:div {:style {:flex "0 1 auto"}}
+                     [:span "{"]
+                     [KeySet (keys data)]
+                     [:span "}"]]
+        (set? data) [:div {:style {:flex "0 1 auto"}} [:span "#{"]
+                     (str (count data) " items")
+                     [:span "}"]]
+        (or (seq? data)
+            (vector? data)) [:div {:style {:flex 1}}
+                             [:span (if (vector? data) "[" "(")]
+                             (str (count data) " items")
+                             [:span (if (vector? data) "]" ")")]]))
+
+(defn KeyValNode [{[k v] :data :keys [path expanded-paths emit-fn swappable]}]
+  (let [path-to-here (conj path k)
+        expandable-node? (and (expandable? v)
+                              (not (empty? v)))
+        expanded? (get expanded-paths path-to-here)]
+    [:div {:style {:display "flex"
+                   :flex-flow "column"}}
+     [:div {:style {:display "flex"}}
+      [:div {:style {:flex "0 0 20px"}}
+       (when expandable-node?
+         [ExpandButton {:expanded? expanded?
+                        :path path-to-here
+                        :emit-fn emit-fn}])]
+      [:div {:style {:flex "0 1 auto" :padding "2px"}}
+       [:div {:style {:display "flex"
+                      :flex-flow "row"}}
+        [:div {:style {:flex "0 1 auto"}}
+         [Node {:data k}]]
+        [:div {:style {:flex "0 1 auto" :paddingLeft "4px"}}
+         (if (expandable? v)
+           [CollectionSummary {:data v}]
+           [Node {:data v
+                  :swappable swappable
+                  :path path-to-here
+                  :expanded-paths expanded-paths
+                  :emit-fn emit-fn}])]]]]
+     (when expanded?
+       [:div {:style {:flex "1"}}
+        [DataFrisk {:hide-header? true
+                    :data v
+                    :swappable swappable
+                    :path path-to-here
+                    :expanded-paths expanded-paths
+                    :emit-fn emit-fn}]])]))
+
+(defn ListVecNode [{:keys [data path expanded-paths emit-fn swappable hide-header?]}]
   (let [expanded? (get expanded-paths path)]
-    [:div {:style {:display "flex"}}
-     (when-not (empty? data)
-       [:div {:style {:flex "0 1 auto"}} [ExpandButton {:expanded? expanded?
-                                                        :path path
-                                                        :emit-fn emit-fn}]])
-     [:div {:style {:flex 1}}
-      [:span (if (vector? data) "[" "(")]
-      (if expanded?
+    [:div {:style {:display "flex"
+                   :flex-flow "column"}}
+     (when-not hide-header?
+       [:div {:style {:display "flex"}}
+        [ExpandButton {:expanded? expanded?
+                       :path path
+                       :emit-fn emit-fn}]
+        [:div {:style {:flex 1}}
+         [:span (if (vector? data) "[" "(")]
+         (str (count data) " items")
+         [:span (if (vector? data) "]" ")")]]])
+     (when expanded?
+       [:div {:style {:flex "0 1 auto" :padding "0 0 0 20px"}}
         (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
                                                      :swappable swappable
                                                      :path (conj path i)
                                                      :expanded-paths expanded-paths
-                                                     :emit-fn emit-fn}]) data)
-        (str (count data) " items"))
-      [:span (if (vector? data) "]" ")")]]]))
+                                                     :emit-fn emit-fn}]) data)])]))
 
-(defn SetNode [{:keys [data path expanded-paths emit-fn swappable]}]
+(defn SetNode [{:keys [data path expanded-paths emit-fn swappable hide-header?]}]
   (let [expanded? (get expanded-paths path)]
-    [:div {:style {:display "flex"}}
-     (when-not (empty? data)
-       [:div {:style {:flex "0 1 auto"}}
-        [ExpandButton {:expanded? expanded?
-                       :path path
-                       :emit-fn emit-fn}]])
-     [:div {:style {:flex 1}} [:span "#{"]
-      (if expanded?
+    [:div {:style {:display "flex"
+                   :flex-flow "column"}}
+     (when-not hide-header?
+       [:div {:style {:display "flex"}}
+        [:div {:style {:flex "0 1 auto"}}
+         [ExpandButton {:expanded? expanded?
+                        :path path
+                        :emit-fn emit-fn}]]
+        [:div {:style {:flex "0 1 auto"}} [:span "#{"]
+         (str (count data) " items")
+         [:span "}"]]])
+     (when expanded?
+       [:div {:style {:flex "0 1 auto" :padding "0 0 0 20px"}}
         (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
                                                      :swappable swappable
                                                      :path (conj path x)
                                                      :expanded-paths expanded-paths
-                                                     :emit-fn emit-fn}]) data)
-        (str (count data) " items"))
-      [:span "}"]]]))
+                                                     :emit-fn emit-fn}]) data)])]))
 
-(defn KeySet [keyset]
-  [:span
-   (->> (map-indexed
-          (fn [i data] ^{:key i} [:span
-                                  (cond (nil? data) [NilText]
-                                        (string? data) [StringText data]
-                                        (keyword? data) [KeywordText data]
-                                        (number? data) [NumberText data]
-                                        :else (str data))]) keyset)
-        (interpose " "))])
-
-(defn MapNode [{:keys [data path expanded-paths emit-fn] :as all}]
+(defn MapNode [{:keys [data path expanded-paths emit-fn hide-header?] :as all}]
   (let [expanded? (get expanded-paths path)]
-    [:div {:style {:display "flex"}}
-     [:div {:style {:flex "0 1 auto"}}
-      [ExpandButton {:expanded? expanded?
-                     :path path
-                     :emit-fn emit-fn}]]
-     [:div {:style {:flex 1}}
-      [:span "{"]
-      (if expanded?
-        (map-indexed (fn [i x] ^{:key i} [KeyValNode (assoc all :data x)]) data)
-        [KeySet (keys data)])
-      [:span "}"]]]))
+    [:div {:style {:display "flex"
+                   :flex-flow "column"}}
+     (when-not hide-header?
+       [:div {:style {:display "flex"}}
+        [:div {:style {:flex "0 1 auto"}}
+         [ExpandButton {:expanded? expanded?
+                        :path path
+                        :emit-fn emit-fn}]]
+        [:div {:style {:flex "0 1 auto"}}
+         [:span "{"]
+         [KeySet (keys data)]
+         [:span "}"]]])
+     (when expanded?
+       [:div {:style {:flex "0 1 auto" :padding "0 0 0 20px"}}
+        (map-indexed (fn [i x] ^{:key i} [KeyValNode (assoc all :data x)]) data)])]))
 
 (defn DataFrisk [{:keys [data] :as all}]
   (cond (map? data) [MapNode all]
         (set? data) [SetNode all]
         (or (seq? data) (vector? data)) [ListVecNode all]
         (satisfies? IDeref data) [DataFrisk (assoc all :data @data)]
-        :else [Node all]))
+        :else [:div {:style {:paddingLeft "20px"}} [Node all]]))
 
 (defn conj-to-set [coll x]
   (conj (or coll #{}) x))
@@ -220,16 +276,19 @@
   (let [data-frisk (:data-frisk @state-atom)
         swappable (when (satisfies? IAtom data)
                     data)
-        emit-fn (emit-fn-factory state-atom id swappable)]
+        emit-fn (emit-fn-factory state-atom id swappable)
+        expanded-paths (get-in data-frisk [id :expanded-paths])]
     [:div
      [:div {:style {:padding "4px 2px"}}
       [ExpandAllButton emit-fn data]
       [CollapseAllButton emit-fn]]
-     [DataFrisk {:data data
-                 :swappable swappable
-                 :path []
-                 :expanded-paths (get-in data-frisk [id :expanded-paths])
-                 :emit-fn emit-fn}]]))
+     [:div {:style {:flex "0 1 auto"
+                    :padding "2px 2px 2px 2px"}}
+      [DataFrisk {:data data
+                  :swappable swappable
+                  :path []
+                  :expanded-paths expanded-paths
+                  :emit-fn emit-fn}]]]))
 
 (defn DataFriskShellVisibleButton [visible? toggle-visible-fn]
   [:button {:onClick toggle-visible-fn
@@ -241,8 +300,8 @@
                            :right 0
                            :width "80px"
                            :text-align "center"}
-                     (:shell-visible-button styles)
-                     (when-not visible? {:bottom 0}))}
+                          (:shell-visible-button styles)
+                          (when-not visible? {:bottom 0}))}
    (if visible? "Hide" "Data frisk")])
 
 (defn DataFriskShellView [shell-state & data]

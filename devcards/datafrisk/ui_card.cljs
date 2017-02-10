@@ -62,3 +62,13 @@
          :list '(nil nil)}
    "root"
    (r/atom {:data-frisk {"root" {:expanded-paths #{[] [:set] [:vec] [:list]}}}})])
+
+(defcard-rg list-of-maps
+  [Root {:my-list '("a string" [1 2 3] {:name "Jim" :age 10} {:name "Jane" :age 7})}
+   "root"
+   (r/atom {:data-frisk {"root" {:expanded-paths #{[] [:my-list]}}}})])
+
+(defcard-rg list-of-lists
+  [Root '(1 (1 2 3))
+   "root"
+   (r/atom {:data-frisk {"root" {:expanded-paths #{[] [:my-list]}}}})])
