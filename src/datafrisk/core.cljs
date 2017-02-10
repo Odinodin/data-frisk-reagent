@@ -8,7 +8,8 @@
                     :textAlign "center"
                     :backgroundColor "transparent"
                     :width "20px"
-                    :height "20px"}
+                    :height "20px"
+                    :cursor "pointer"}
             :onClick #(emit-fn (if expanded? :contract :expand) path)}
    [:svg {:viewBox "0 0 100 100"
           :width "100%" :height "100%"
