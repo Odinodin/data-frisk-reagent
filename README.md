@@ -21,7 +21,7 @@ This library's public API consists of two public functions/reagent-components: `
 
 ### DataFriskShell
 
-This is what you see in the gif animation above. This component renders as a single data navigation "shell" fixed to the bottom of the window. It can be expanded/hidden via a toggle at the bottom right hand corner of the screen. It's best when all the data you want to frisk is within scope within a single parent component.
+This is what you see in the animation above. This component renders as a single data navigation "shell" fixed to the bottom of the window. It can be expanded/hidden via a toggle at the bottom right hand corner of the screen. 
 
 Example:
 
@@ -46,33 +46,9 @@ Example:
     (js/document.getElementById "app")))
 ```
 
-However, if you did something like:
-
-```clojure
-(ns datafrisk.demo
-  (:require [reagent.core :as r]
-            [datafrisk.core :as d]))
-
-(defn some-component
-  [name]
-  [:div "Hi " name [d/DataFriskShell {:name name :testing 123}]])
-
-(defn mount-root []
-  (r/render
-    [:div
-     (for [x ["Bob" "Jo" "Ellen"]]
-       [some-component x])]
-    (js/document.getElementById "app")))
-```
-
-Then you'll find that one of the `:testing` maps will end up being accessible via the shell.
-For this situation, we have the following:
-
-
 ### FriskInline
 
-This component renders as a small box label "data frisk" which expands into a navigator much like that found in the shell. It's perfect for situations where you want to frisk data from multiple components (or multiple instances of the same component, as with our `some-component` example above). Here's a quick demo.
-
+This component renders as a small box labeled "Data frisk" which expands into a navigator much like that found in the shell. It's perfect for situations where you want to frisk data from multiple components (or multiple instances of the same component, as with our `some-component` example above). Here's a quick demo.
 
 ```clojure
 (ns datafrisk.demo
@@ -91,55 +67,16 @@ This component renders as a small box label "data frisk" which expands into a na
     (js/document.getElementById "app")))
 ```
 
-Et viola!
+### Re-frame
 
-### Use with re-frame
-
-This example uses [re-frame](https://github.com/Day8/re-frame) to display a data-frisk component displaying the current app database:
-
-```clojure
-(ns datafrisk.re-frame-example
-  (:require [reagent.core :as r]
-            [datafrisk.core :as d]
-            [re-frame.core :refer [subscribe reg-sub]]))
-
-;; Set up a subscription
-(defn- app-db-subscription
-  "Subscribe to any change in the app db under the path"
-  [db [_ path]]
-  (get-in db path))
-(reg-sub :debug/everything app-db-subscription)
-
-;; Define a form-2 component
-(defn frisk
-  [& path]
-  (let [everything (subscribe [:debug/everything path])]
-    (fn [& path]
-      [d/DataFriskShell @everything])))
-
-;; Now you can use the component thusly:
-
-(defn mount-root []
-  (r/render
-    [:div
-     [:h1 "Welcome to ZomboCom"]
-
-     ;; This displays the entire app database:
-     [frisk]
-
-     ;; This displays everything under a specific subtree:
-     [frisk :subtree :that :interests-me]]
-
-    (js/document.getElementById "app")))
-```
+See the [re-frisk](https://github.com/flexsurfer/re-frisk) project.
 
 ### For more
 
-See the dev/demo.cljs namespace for more usage of the shell.
-
+See the dev/demo.cljs namespace for example use.
 
 ## License
 
-Copyright © 2016 Odin Standal
+Copyright © 2017 Odin Standal
 
 Distributed under the MIT License (MIT)
