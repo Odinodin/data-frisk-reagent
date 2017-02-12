@@ -143,7 +143,7 @@
          [ExpandButton {:expanded? expanded?
                         :path path-to-here
                         :emit-fn emit-fn}])]
-      [:div {:style {:flex "0 1 auto" :padding "2px"}}
+      [:div {:style {:flex "0 1 auto"}}
        [:div {:style {:display "flex"
                       :flex-flow "row"}}
         [:div {:style {:flex "0 1 auto"}}
@@ -200,7 +200,7 @@
          (str (count data) " items")
          [:span "}"]]])
      (when expanded?
-       [:div {:style {:flex "0 1 auto" :padding "0 0 0 20px"}}
+       [:div {:style {:flex "0 1 auto" :paddingLeft "20px"}}
         (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
                                                      :swappable swappable
                                                      :path (conj path x)
@@ -222,7 +222,7 @@
          [KeySet (keys data)]
          [:span "}"]]])
      (when expanded?
-       [:div {:style {:flex "0 1 auto" :padding "0 0 0 20px"}}
+       [:div {:style {:flex "0 1 auto" :paddingLeft "20px"}}
         (map-indexed (fn [i x] ^{:key i} [KeyValNode (assoc all :data x)]) data)])]))
 
 (defn DataFrisk [{:keys [data] :as all}]
@@ -283,8 +283,7 @@
      [:div {:style {:padding "4px 2px"}}
       [ExpandAllButton emit-fn data]
       [CollapseAllButton emit-fn]]
-     [:div {:style {:flex "0 1 auto"
-                    :padding "2px 2px 2px 2px"}}
+     [:div {:style {:flex "0 1 auto"}}
       [DataFrisk {:data data
                   :swappable swappable
                   :path []
