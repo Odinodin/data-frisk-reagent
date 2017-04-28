@@ -3,6 +3,17 @@
 
 (declare DataFrisk)
 
+(def styles
+  {:shell {:backgroundColor "#FAFAFA"
+           :fontFamily "Consolas,Monaco,Courier New,monospace"
+           :fontSize "12px"
+           :z-index 9999}
+   :strings {:color "#4Ebb4E"}
+   :keywords {:color "purple"}
+   :numbers {:color "blue"}
+   :nil {:color "red"}
+   :shell-visible-button {:backgroundColor "#4EE24E"}})
+
 (defn ExpandButton [{:keys [expanded? path emit-fn]}]
   [:button {:style {:border 0
                     :textAlign "center"
@@ -16,17 +27,6 @@
           :style {:transition "all 0.2s ease"
                   :transform (when expanded? "rotate(90deg)")}}
     [:polygon {:points "0,0 0,100 100,50" :stroke "black"}]]])
-
-(def styles
-  {:shell {:backgroundColor "#FAFAFA"
-           :fontFamily "Consolas,Monaco,Courier New,monospace"
-           :fontSize "12px"
-           :z-index 9999}
-   :strings {:color "#4Ebb4E"}
-   :keywords {:color "purple"}
-   :numbers {:color "blue"}
-   :nil {:color "red"}
-   :shell-visible-button {:backgroundColor "#4EE24E"}})
 
 (defn ExpandAllButton [emit-fn data]
   [:button {:onClick #(emit-fn :expand-all data)
@@ -50,6 +50,19 @@
                     :borderLeft "0"
                     :backgroundColor "white"}}
    "Collapse all"])
+
+(defn CopyButton [emit-fn data]
+  [:button {:onClick #(emit-fn :copy data)
+            :style {:padding "3px"
+                    :cursor "pointer"
+                    :borderTopRightRadius "2px"
+                    :borderBottomRightRadius "2px"
+                    :borderTop "1px solid darkgray"
+                    :borderBottom "1px solid darkgray"
+                    :borderRight "1px solid darkgray"
+                    :borderLeft "0"
+                    :backgroundColor "white"}}
+   "Copy"])
 
 (defn NilText []
   [:span {:style (:nil styles)} (pr-str nil)])
@@ -261,6 +274,31 @@
                   expanded-paths))))
       expanded-paths)))
 
+(defn copy-to-clipboard [data]
+  (let [pretty (with-out-str (cljs.pprint/pprint data))
+        textArea (.createElement js/document "textarea")]
+    (doto textArea
+      ;; Put in top left corner of screen
+      (aset "style" "position" "fixed")
+      (aset "style" "top" 0)
+      (aset "style" "left" 0)
+      ;; Make it small
+      (aset "style" "width" "2em")
+      (aset "style" "height" "2em")
+      (aset "style" "padding" 0)
+      (aset "style" "border" "none")
+      (aset "style" "outline" "none")
+      (aset "style" "boxShadow" "none")
+      ;; Avoid flash of white box
+      (aset "style" "background" "transparent")
+      (aset "value" pretty))
+
+    (.appendChild (.-body js/document) textArea)
+    (.select textArea)
+
+    (.execCommand js/document "copy")
+    (.removeChild (.-body js/document) textArea)))
+
 (defn emit-fn-factory [state-atom id swappable]
   (fn [event & args]
     (case event
@@ -268,6 +306,7 @@
       :expand-all (swap! state-atom assoc-in [:data-frisk id :expanded-paths] (expand-all-paths (first args)))
       :contract (swap! state-atom update-in [:data-frisk id :expanded-paths] disj (first args))
       :collapse-all (swap! state-atom assoc-in [:data-frisk id :expanded-paths] #{})
+      :copy (copy-to-clipboard (first args))
       :changed (let [[path value] args]
                  (if (seq path)
                    (swap! swappable assoc-in path value)
@@ -282,7 +321,8 @@
     [:div
      [:div {:style {:padding "4px 2px"}}
       [ExpandAllButton emit-fn data]
-      [CollapseAllButton emit-fn]]
+      [CollapseAllButton emit-fn]
+      [CopyButton emit-fn data]]
      [:div {:style {:flex "0 1 auto"}}
       [DataFrisk {:data data
                   :swappable swappable
