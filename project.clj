@@ -1,13 +1,13 @@
-(defproject data-frisk-reagent "0.3.7"
+(defproject data-frisk-reagent "0.4.0"
   :description "Frisking EDN since 2016!"
   :url "http://github.com/odinodin/data-frisk-reagent"
   :license {:name "MIT"
             :url "https://opensource.org/licenses/MIT"}
-  :min-lein-version "2.6.1"
-  :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.7.228"]
-                 [reagent "0.6.0"]]
-  :plugins [[lein-figwheel "0.5.2"]
+  :min-lein-version "2.7.1"
+  :dependencies [[org.clojure/clojure "1.9.0-alpha15"]
+                 [org.clojure/clojurescript "1.9.521"]
+                 [reagent "0.6.1"]]
+  :plugins [[lein-figwheel "0.5.10"]
             [lein-doo "0.1.7"]
             [lein-cljsbuild "1.1.3" :exclusions [[org.clojure/clojure]]]]
   :source-paths ["src"]
@@ -19,8 +19,8 @@
 
   :profiles {:dev {:dependencies [[doo "0.1.7"]
                                   [com.cemerick/piggieback "0.2.1"]
-                                  [figwheel-sidecar "0.5.2"]
-                                  [devcards "0.2.1-6" :exclusions [[cljsjs/react]]]]
+                                  [figwheel-sidecar "0.5.10"]
+                                  [devcards "0.2.3" :exclusions [[cljsjs/react]]]]
                    :source-paths ["src" "devcards"]
                    :resource-paths ["devresources"]
                    :cljsbuild {:builds [{:id "dev"
