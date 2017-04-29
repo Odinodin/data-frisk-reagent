@@ -28,40 +28,37 @@
                   :transform (when expanded? "rotate(90deg)")}}
     [:polygon {:points "0,0 0,100 100,50" :stroke "black"}]]])
 
+(def button-style {:padding "1px 3px"
+                   :cursor "pointer"
+                   :background-color "white"})
+
 (defn ExpandAllButton [emit-fn data]
   [:button {:onClick #(emit-fn :expand-all data)
-            :style {:padding "3px"
-                    :borderTopLeftRadius "2px"
-                    :borderBottomLeftRadius "2px"
-                    :cursor "pointer"
-                    :border "1px solid darkgray"
-                    :backgroundColor "white"}}
-   "Expand all"])
+            :style (merge button-style
+                          {:borderTopLeftRadius "2px"
+                           :borderBottomLeftRadius "2px"
+                           :border "1px solid darkgray"})}
+   "Expand"])
 
 (defn CollapseAllButton [emit-fn data]
   [:button {:onClick #(emit-fn :collapse-all)
-            :style {:padding "3px"
-                    :cursor "pointer"
-                    :borderTopRightRadius "2px"
-                    :borderBottomRightRadius "2px"
-                    :borderTop "1px solid darkgray"
+            :style
+            (merge button-style
+                   {:borderTop "1px solid darkgray"
                     :borderBottom "1px solid darkgray"
                     :borderRight "1px solid darkgray"
-                    :borderLeft "0"
-                    :backgroundColor "white"}}
-   "Collapse all"])
+                    :borderLeft "0"})}
+   "Collapse"])
 
 (defn CopyButton [emit-fn data]
   [:button {:onClick #(emit-fn :copy data)
-            :style {:padding "3px"
-                    :cursor "pointer"
-                    :borderTopRightRadius "2px"
-                    :borderBottomRightRadius "2px"
-                    :borderTop "1px solid darkgray"
-                    :borderBottom "1px solid darkgray"
-                    :borderRight "1px solid darkgray"
-                    :borderLeft "0"
-                    :backgroundColor "white"}}
+            :style (merge button-style
+                          {:borderTopRightRadius "2px"
+                           :borderBottomRightRadius "2px"
+                           :borderTop "1px solid darkgray"
+                           :borderBottom "1px solid darkgray"
+                           :borderRight "1px solid darkgray"
+                           :borderLeft "0"})}
    "Copy"])
 
 (defn NilText []
@@ -371,7 +368,7 @@
     (fn [& data]
       (apply DataFriskShellView shell-state data))))
 
-(defn FriskInlineVisibilityButton
+(defn VisibilityButton
   [visible? update-fn]
   [:button {:style {:border 0
                     :backgroundColor "transparent" :width "20px" :height "20px"}
@@ -382,7 +379,7 @@
                   :transform (when visible? "rotate(90deg)")}}
     [:polygon {:points "0,0 0,100 100,50" :stroke "black"}]]])
 
-(defn FriskInline [& data]
+(defn DataFriskView [& data]
   (let [expand-by-default (reduce #(assoc-in %1 [:data-frisk %2 :expanded-paths] #{[]}) {} (range (count data)))
         state-atom (r/atom expand-by-default)]
     (fn [& data]
@@ -397,7 +394,7 @@
                                 :max-height "30px"
                                 :max-width "100px"})
                              (:shell styles))}
-         [FriskInlineVisibilityButton visible? (fn [_] (swap! state-atom assoc-in [:data-frisk :visible?] (not visible?)))]
+         [VisibilityButton visible? (fn [_] (swap! state-atom assoc-in [:data-frisk :visible?] (not visible?)))]
          [:span "Data frisk"]
          (when visible?
            [:div {:style {:padding "10px"
@@ -410,5 +407,9 @@
                           :overflow-y "auto"}}
             (map-indexed (fn [id x]
                            ^{:key id} [Root x id state-atom]) data)])]))))
+
+;; Deprecated
+(defn FriskInline [& data]
+  [DataFriskView data])
 
 

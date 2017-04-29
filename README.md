@@ -16,7 +16,7 @@ Add `data-frisk-reagent` to the dev `:dependencies` in your `project.clj`
 
 ## Usage
 
-This library's public API consists of two reagent components: `datafrisk.core/DataFriskShell` and `datafrisk.core/FriskInline`.
+This library's public API consists of two reagent components: `datafrisk.core/DataFriskShell` and `datafrisk.core/DataFriskView`.
 
 
 ### DataFriskShell
@@ -47,26 +47,29 @@ Example:
     (js/document.getElementById "app")))
 ```
 
-### FriskInline
+### DataFriskView
 
-This component renders as a small box labeled "Data frisk" which expands into a navigator much like that found in the shell. 
-It's perfect for situations where you want to frisk data from multiple components (or multiple instances of the same component, 
-as with our `some-component` example below). Here's a quick demo.
+This component renders lets you dig in to any data structure. Here's an example of its use:
 
 ```clojure
 (ns datafrisk.demo
   (:require [reagent.core :as r]
             [datafrisk.core :as d]))
 
-(defn some-component
-  [name]
-  [:div "Hi " name [d/FriskInline {:name name :testing 123}]])
+(def app-state {:animals [{:species "Giraffe" :age 10} 
+                          {:species "Rhino" :age 4} 
+                          {:species "Monkey" :age 4}]})
+
+(defn AnimalSalute [animal]
+  [:div 
+    (str "Hi " (:species animal) "!")
+    [d/DataFriskView animal]])
 
 (defn mount-root []
   (r/render
     [:div
-     (for [x ["Bob" "Jo" "Ellen"]]
-       [some-component x])]
+     (for [animal (:animals app-state)]
+       [AnimalSalute animal])]
     (js/document.getElementById "app")))
 ```
 
