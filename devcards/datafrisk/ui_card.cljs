@@ -1,7 +1,7 @@
 (ns datafrisk.ui-card
   (:require [devcards.core]
             [reagent.core :as r]
-            [datafrisk.core :refer [Root]])
+            [datafrisk.view :refer [Root]])
   (:require-macros [devcards.core :as dc :refer [defcard-rg]]))
 
 (defcard-rg modifiable-data

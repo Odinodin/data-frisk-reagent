@@ -1,6 +1,6 @@
 (ns datafrisk.test-runner
   (:require [doo.runner :refer-macros [doo-tests]]
-            datafrisk.core-test))
+            datafrisk.view-test))
 
 (doo-tests
-  'datafrisk.core-test)
+  'datafrisk.view-test)

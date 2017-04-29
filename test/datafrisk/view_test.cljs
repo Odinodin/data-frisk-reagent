@@ -1,6 +1,6 @@
-(ns datafrisk.core-test
+(ns datafrisk.view-test
   (:require [cljs.test :refer-macros [are deftest is]]
-            [datafrisk.core :as sut]
+            [datafrisk.view :as sut]
             [reagent.core :as r]))
 
 (deftest first-test
