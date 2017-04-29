@@ -6,7 +6,7 @@ Visualize your data in your Reagent apps as a tree structure.
 
 Suitable for use during development.
 
-<img src="datafrisk-shell.gif">
+<img src="datafrisk-shell.gif" style="max-width: 400px;">
 
 ## Install
 
