@@ -16,12 +16,13 @@ Add `data-frisk-reagent` to the dev `:dependencies` in your `project.clj`
 
 ## Usage
 
-This library's public API consists of two public functions/reagent-components: `datafrisk.core/DataFriskShell` and `datafrisk.core/FriskInline`.
+This library's public API consists of two reagent components: `datafrisk.core/DataFriskShell` and `datafrisk.core/FriskInline`.
 
 
 ### DataFriskShell
 
-This is what you see in the animation above. This component renders as a single data navigation "shell" fixed to the bottom of the window. It can be expanded/hidden via a toggle at the bottom right hand corner of the screen. 
+This is what you see in the animation above. The component renders as a single data navigation "shell" fixed to the bottom of the window. 
+It can be expanded/hidden via a toggle at the bottom right hand corner of the screen. 
 
 Example:
 
@@ -48,7 +49,9 @@ Example:
 
 ### FriskInline
 
-This component renders as a small box labeled "Data frisk" which expands into a navigator much like that found in the shell. It's perfect for situations where you want to frisk data from multiple components (or multiple instances of the same component, as with our `some-component` example above). Here's a quick demo.
+This component renders as a small box labeled "Data frisk" which expands into a navigator much like that found in the shell. 
+It's perfect for situations where you want to frisk data from multiple components (or multiple instances of the same component, 
+as with our `some-component` example below). Here's a quick demo.
 
 ```clojure
 (ns datafrisk.demo

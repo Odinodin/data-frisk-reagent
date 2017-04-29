@@ -6,8 +6,10 @@
 
 (defn Animals [data]
   [:div "Awesome animals"
-   [:ul
-    (map-indexed (fn [i {:keys [animal age]}] ^{:key i} [:li (str animal ", " age " years old")]) (:animals data))]])
+   (into [:ul]
+     (map-indexed (fn [i {:keys [animal age]}]
+                    ^{:key i} [:li (str animal ", " age " years old")])
+       (:animals data)))])
 
 (def state (r/atom {:animals '({:animal "Monkey", :age 22222}
                                     {:animal "Giraffe", :age 45}
