@@ -79,7 +79,7 @@
 (defn KeySet [keyset]
   [:span
    (->> keyset
-        (sort-by (partial str))
+        (sort-by str)
         (map-indexed
           (fn [i data] ^{:key i} [:span
                                   (cond (nil? data) [NilText]
@@ -236,7 +236,9 @@
          [:span "}"]]])
      (when expanded?
        [:div {:style {:flex "0 1 auto" :paddingLeft "20px"}}
-        (map-indexed (fn [i x] ^{:key i} [KeyValNode (assoc all :data x)]) data)])]))
+        (->> data
+             (sort-by (fn [[k _]] (str k)))
+             (map-indexed (fn [i x] ^{:key i} [KeyValNode (assoc all :data x)])))])]))
 
 (defn DataFrisk [{:keys [data] :as all}]
   (cond (map? data) [MapNode all]
