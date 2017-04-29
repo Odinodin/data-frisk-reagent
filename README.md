@@ -6,7 +6,7 @@ Visualize your data in your Reagent apps as a tree structure.
 
 Suitable for use during development.
 
-<img src="data-frisk.gif">
+<img src="datafrisk-shell.gif">
 
 ## Install
 
@@ -50,6 +50,7 @@ Example:
 ### DataFriskView
 
 This component renders lets you dig in to any data structure. Here's an example of its use:
+
 
 ```clojure
 (ns datafrisk.demo
