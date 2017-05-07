@@ -49,7 +49,7 @@ Example:
 
 ### DataFriskView
 
-This component renders lets you dig in to any data structure. Here's an example of its use:
+This component lets you dig in to any data structure. Here's an example of its use:
 
 
 ```clojure
