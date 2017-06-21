@@ -15,8 +15,8 @@
 
   :aliases {"testing" ["do" ["clean"] ["doo" "phantom" "test" "once"]]}
 
-  :profiles {:dev {:dependencies [[org.clojure/clojure "1.9.0-alpha15"]
-                                  [org.clojure/clojurescript "1.9.521"]
+  :profiles {:dev {:dependencies [[org.clojure/clojure "1.9.0-alpha17"]
+                                  [org.clojure/clojurescript "1.9.562"]
                                   [doo "0.1.7"]
                                   [com.cemerick/piggieback "0.2.1"]
                                   [figwheel-sidecar "0.5.10"]
