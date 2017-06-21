@@ -292,10 +292,9 @@
 (defn conj-to-set [coll x]
   (conj (or coll #{}) x))
 
-;; TODO Reimplement
-(defn expand-all-paths [root-value]
+(defn expand-all-paths [root-value current-expanded-paths]
   (loop [remaining [{:path [] :node root-value}]
-         expanded-paths #{}]
+         expanded-paths current-expanded-paths]
     (if (seq remaining)
       (let [[current & rest] remaining
             current-node (if (satisfies? IDeref (:node current)) @(:node current) (:node current))]
@@ -304,18 +303,22 @@
                 (concat rest (map (fn [[k v]] {:path (conj (:path current) k)
                                                :node v})
                                   current-node))
-                (conj expanded-paths (:path current)))
-              (or (seq? current-node) (vector? current-node))
+                (assoc-in expanded-paths [(:path current) :expanded?] true))
+
+              (or (seq? current-node)
+                  (vector? current-node)
+                  (set? current-node))
               (recur
                 (concat rest (map-indexed (fn [i node] {:path (conj (:path current) i)
                                                         :node node})
                                current-node))
-                (conj expanded-paths (:path current)))
+                (assoc-in expanded-paths [(:path current) :expanded?] true))
+
               :else
               (recur
                 rest
                 (if (coll? current-node)
-                  (conj expanded-paths (:path current))
+                  (assoc-in expanded-paths [(:path current) :expanded?] true)
                   expanded-paths))))
       expanded-paths)))
 
@@ -351,7 +354,7 @@
   (fn [event & args]
     (case event
       :expand (swap! state-atom assoc-in [:data-frisk id :metadata-paths (first args) :expanded?] true)
-      :expand-all (prn "NOT IMPLEMENTED")
+      :expand-all (swap! state-atom update-in [:data-frisk id :metadata-paths] (partial expand-all-paths (first args)))
       :contract (swap! state-atom assoc-in [:data-frisk id :metadata-paths (first args) :expanded?] false)
       :collapse-all (swap! state-atom update-in [:data-frisk id :metadata-paths] collapse-all)
       :copy (copy-to-clipboard (first args))

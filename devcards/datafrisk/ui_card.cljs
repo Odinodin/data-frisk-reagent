@@ -79,6 +79,12 @@
    (r/atom {:data-frisk {"root" {:metadata-paths {[] {:expanded? true}
                                                   [:my-list] (:expanded? true)}}}})])
 
+(defcard-rg set-with-list
+  [Root #{1 '(1 2 3) [4 5 6]}
+   "root"
+   (r/atom {:data-frisk {"root" {:metadata-paths {[] {:expanded? true}
+                                                  [:my-list] (:expanded? true)}}}})])
+
 (defcard-rg meta-data
   [Root {:a 1 :b 2}
    "root"
