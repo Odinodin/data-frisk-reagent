@@ -1,5 +1,6 @@
 (ns datafrisk.view
-  (:require [reagent.core :as r]))
+  (:require [reagent.core :as r]
+            [datafrisk.util :as u]))
 
 (declare DataFrisk)
 
@@ -13,6 +14,23 @@
    :numbers {:color "blue"}
    :nil {:color "red"}
    :shell-visible-button {:backgroundColor "#4EE24E"}})
+
+(defn ErrorIcon []
+  [:svg {:viewBox "0 0 30 42" :width "100%" :height "100%"}
+   [:path {:fill "darkorange"
+           :stroke "red"
+           :stroke-width "2"
+           :d "M15 3
+           Q16.5 6.8 25 18
+           A12.8 12.8 0 1 1 5 18
+           Q13.5 6.8 15 3z"}]
+   [:circle {:cx 15 :cy 32 :r 7 :fill "yellow"}]])
+
+(defn ErrorText [text]
+  [:div {:style {:display "flex"
+                 :align-items "center"
+                 :fontSize "0.7em"
+                 :color "red"}} text])
 
 (defn ExpandButton [{:keys [expanded? path emit-fn]}]
   [:button {:style {:border 0
@@ -86,8 +104,8 @@
                                         :else (str data))]))
         (interpose " "))])
 
-(defn Node [{:keys [data path emit-fn swappable]}]
-  [:div (cond
+(defn Node [{:keys [data path emit-fn swappable metadata-paths]}]
+  [:div {:style {:display "flex"}} (cond
           (nil? data)
           [NilText]
 
@@ -121,7 +139,9 @@
                        (emit-fn :changed path (js/Number (.. e -target -value))))}]
             [NumberText data])
           :else
-          (str data))])
+          (str data))
+   (when-let [errors (:error (get metadata-paths path))]
+     [ErrorText errors])])
 
 (defn expandable? [v]
   (or (map? v) (seq? v) (coll? v)))
@@ -140,11 +160,12 @@
                              (str (count data) " items")
                              [:span (if (vector? data) "]" ")")]]))
 
-(defn KeyValNode [{[k v] :data :keys [path expanded-paths emit-fn swappable]}]
+(defn KeyValNode [{[k v] :data :keys [path metadata-paths emit-fn swappable]}]
   (let [path-to-here (conj path k)
         expandable-node? (and (expandable? v)
                               (not (empty? v)))
-        expanded? (get expanded-paths path-to-here)]
+        metadata (get metadata-paths path-to-here)
+        expanded? (:expanded? metadata)]
     [:div {:style {:display "flex"
                    :flex-flow "column"}}
      [:div {:style {:display "flex"}}
@@ -164,7 +185,7 @@
            [Node {:data v
                   :swappable swappable
                   :path path-to-here
-                  :expanded-paths expanded-paths
+                  :metadata-paths metadata-paths
                   :emit-fn emit-fn}])]]]]
      (when expanded?
        [:div {:style {:flex "1"}}
@@ -172,11 +193,12 @@
                     :data v
                     :swappable swappable
                     :path path-to-here
-                    :expanded-paths expanded-paths
+                    :metadata-paths metadata-paths
                     :emit-fn emit-fn}]])]))
 
-(defn ListVecNode [{:keys [data path expanded-paths emit-fn swappable hide-header?]}]
-  (let [expanded? (get expanded-paths path)]
+(defn ListVecNode [{:keys [data path metadata-paths emit-fn swappable hide-header?]}]
+  (let [metadata (get metadata-paths path)
+        expanded? (:expanded? metadata)]
     [:div {:style {:display "flex"
                    :flex-flow "column"}}
      (when-not hide-header?
@@ -184,20 +206,28 @@
         [ExpandButton {:expanded? expanded?
                        :path path
                        :emit-fn emit-fn}]
-        [:div {:style {:flex 1}}
+        [:div {:style {:flex "0 1 auto"}}
          [:span (if (vector? data) "[" "(")]
          (str (count data) " items")
-         [:span (if (vector? data) "]" ")")]]])
+         [:span (if (vector? data) "]" ")")]]
+        (when (:error metadata)
+          [:div {:style {:flex "0 0 auto"
+                         :width "1em"
+                         :height "1.2em"}}
+           [ErrorIcon]])])
      (when expanded?
        [:div {:style {:flex "0 1 auto" :padding "0 0 0 20px"}}
+        (when (:error metadata)
+          [ErrorText (:error metadata)])
         (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
                                                      :swappable swappable
                                                      :path (conj path i)
-                                                     :expanded-paths expanded-paths
+                                                     :metadata-paths metadata-paths
                                                      :emit-fn emit-fn}]) data)])]))
 
-(defn SetNode [{:keys [data path expanded-paths emit-fn swappable hide-header?]}]
-  (let [expanded? (get expanded-paths path)]
+(defn SetNode [{:keys [data path metadata-paths emit-fn swappable hide-header?]}]
+  (let [metadata (get metadata-paths path)
+        expanded? (:expanded? metadata)]
     [:div {:style {:display "flex"
                    :flex-flow "column"}}
      (when-not hide-header?
@@ -208,17 +238,25 @@
                         :emit-fn emit-fn}]]
         [:div {:style {:flex "0 1 auto"}} [:span "#{"]
          (str (count data) " items")
-         [:span "}"]]])
+         [:span "}"]]
+        (when (:error metadata)
+          [:div {:style {:flex "0 0 auto"
+                         :width "1em"
+                         :height "1.2em"}}
+           [ErrorIcon]])])
      (when expanded?
        [:div {:style {:flex "0 1 auto" :paddingLeft "20px"}}
+        (when (:error metadata)
+          [ErrorText (:error metadata)])
         (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
                                                      :swappable swappable
-                                                     :path (conj path x)
-                                                     :expanded-paths expanded-paths
+                                                     :path (conj path i)
+                                                     :metadata-paths metadata-paths
                                                      :emit-fn emit-fn}]) data)])]))
 
-(defn MapNode [{:keys [data path expanded-paths emit-fn hide-header?] :as all}]
-  (let [expanded? (get expanded-paths path)]
+(defn MapNode [{:keys [data path metadata-paths emit-fn hide-header?] :as all}]
+  (let [metadata (get metadata-paths path)
+        expanded? (:expanded? metadata)]
     [:div {:style {:display "flex"
                    :flex-flow "column"}}
      (when-not hide-header?
@@ -228,11 +266,18 @@
                         :path path
                         :emit-fn emit-fn}]]
         [:div {:style {:flex "0 1 auto"}}
-         [:span "{"]
+         [:span (str "{")]
          [KeySet (keys data)]
-         [:span "}"]]])
+         [:span "}"]]
+        (when (:error metadata)
+          [:div {:style {:flex "0 0 auto"
+                         :width "1em"
+                         :height "1.2em"}}
+           [ErrorIcon]])])
      (when expanded?
        [:div {:style {:flex "0 1 auto" :paddingLeft "20px"}}
+        (when (:error metadata)
+          [ErrorText (:error metadata)])
         (->> data
              (sort-by (fn [[k _]] (str k)))
              (map-indexed (fn [i x] ^{:key i} [KeyValNode (assoc all :data x)])))])]))
@@ -247,6 +292,7 @@
 (defn conj-to-set [coll x]
   (conj (or coll #{}) x))
 
+;; TODO Reimplement
 (defn expand-all-paths [root-value]
   (loop [remaining [{:path [] :node root-value}]
          expanded-paths #{}]
@@ -298,13 +344,16 @@
     (.execCommand js/document "copy")
     (.removeChild (.-body js/document) textArea)))
 
+(defn collapse-all [metadata-paths]
+  (u/map-vals #(assoc % :expanded? false) metadata-paths))
+
 (defn emit-fn-factory [state-atom id swappable]
   (fn [event & args]
     (case event
-      :expand (swap! state-atom update-in [:data-frisk id :expanded-paths] conj-to-set (first args))
-      :expand-all (swap! state-atom assoc-in [:data-frisk id :expanded-paths] (expand-all-paths (first args)))
-      :contract (swap! state-atom update-in [:data-frisk id :expanded-paths] disj (first args))
-      :collapse-all (swap! state-atom assoc-in [:data-frisk id :expanded-paths] #{})
+      :expand (swap! state-atom assoc-in [:data-frisk id :metadata-paths (first args) :expanded?] true)
+      :expand-all (prn "NOT IMPLEMENTED")
+      :contract (swap! state-atom assoc-in [:data-frisk id :metadata-paths (first args) :expanded?] false)
+      :collapse-all (swap! state-atom update-in [:data-frisk id :metadata-paths] collapse-all)
       :copy (copy-to-clipboard (first args))
       :changed (let [[path value] args]
                  (if (seq path)
@@ -316,7 +365,7 @@
         swappable (when (satisfies? IAtom data)
                     data)
         emit-fn (emit-fn-factory state-atom id swappable)
-        expanded-paths (get-in data-frisk [id :expanded-paths])]
+        metadata-paths (get-in data-frisk [id :metadata-paths])]
     [:div
      [:div {:style {:padding "4px 2px"}}
       [ExpandAllButton emit-fn data]
@@ -326,7 +375,7 @@
       [DataFrisk {:data data
                   :swappable swappable
                   :path []
-                  :expanded-paths expanded-paths
+                  :metadata-paths metadata-paths
                   :emit-fn emit-fn}]]]))
 
 (defn VisibilityButton
@@ -341,7 +390,7 @@
     [:polygon {:points "0,0 0,100 100,50" :stroke "black"}]]])
 
 (defn DataFriskView [& data]
-  (let [expand-by-default (reduce #(assoc-in %1 [:data-frisk %2 :expanded-paths] #{[]}) {} (range (count data)))
+  (let [expand-by-default (reduce #(assoc-in %1 [:data-frisk %2 :metadata-paths [] :expanded?] true) {} (range (count data)))
         state-atom (r/atom expand-by-default)]
     (fn [& data]
       (let [data-frisk (:data-frisk @state-atom)

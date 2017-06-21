@@ -14,7 +14,7 @@
             :style (merge {:border 0
                            :cursor "pointer"
                            :font "inherit"
-                           :padding "12px"
+                           :padding "8px 12px"
                            :position "fixed"
                            :right 0
                            :width "80px"
