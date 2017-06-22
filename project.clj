@@ -1,4 +1,4 @@
-(defproject data-frisk-reagent "0.4.2"
+(defproject data-frisk-reagent "0.4.3"
   :description "Frisking EDN since 2016!"
   :url "http://github.com/odinodin/data-frisk-reagent"
   :license {:name "MIT"
