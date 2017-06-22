@@ -23,15 +23,15 @@
 
 (defcard-rg bad-vec
   [SpecView
-   {:errors (s/explain-data :app/persons [1 2 3])}])
+   {:errors (s/explain-data :app/persons [1 2 3 [4 5]])}])
 
 (defcard-rg bad-list
   [SpecView
-   {:errors (s/explain-data :app/persons '(1 2 3))}])
+   {:errors (s/explain-data :app/persons '(1 2 3 (4 5 )))}])
 
 (defcard-rg bad-set
   [SpecView
-   {:errors (s/explain-data :app/persons #{1 2 [1 2] 3})}])
+   {:errors (s/explain-data :app/persons #{1 2 #{3 4} 5})}])
 
 (defcard-rg bad-nested-map
   [SpecView

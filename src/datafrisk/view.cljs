@@ -27,13 +27,14 @@
    [:circle {:cx 15 :cy 32 :r 7 :fill "yellow"}]])
 
 (defn ErrorText [text]
-  [:div {:style {:display "flex"
+  [:div {:style {:fontSize "0.7em"
+                 :display "flex"
                  :align-items "center"
-                 :fontSize "0.7em"
                  :color "red"}} text])
 
 (defn ExpandButton [{:keys [expanded? path emit-fn]}]
   [:button {:style {:border 0
+                    :padding "5px 4px 5px 2px"
                     :textAlign "center"
                     :backgroundColor "transparent"
                     :width "20px"
@@ -141,7 +142,7 @@
           :else
           (str data))
    (when-let [errors (:error (get metadata-paths path))]
-     [ErrorText errors])])
+     [ErrorText (str "\u00A0 " errors)])])
 
 (defn expandable? [v]
   (or (map? v) (seq? v) (coll? v)))
@@ -203,22 +204,23 @@
                    :flex-flow "column"}}
      (when-not hide-header?
        [:div {:style {:display "flex"}}
+        (when (:error metadata)
+          [:div {:style {:margin-left "-1em"
+                         :width "1em"
+                         :height "1.2em"}}
+           [ErrorIcon]])
         [ExpandButton {:expanded? expanded?
                        :path path
                        :emit-fn emit-fn}]
         [:div {:style {:flex "0 1 auto"}}
          [:span (if (vector? data) "[" "(")]
          (str (count data) " items")
-         [:span (if (vector? data) "]" ")")]]
-        (when (:error metadata)
-          [:div {:style {:flex "0 0 auto"
-                         :width "1em"
-                         :height "1.2em"}}
-           [ErrorIcon]])])
+         [:span (if (vector? data) "]" ")")]]])
      (when expanded?
        [:div {:style {:flex "0 1 auto" :padding "0 0 0 20px"}}
         (when (:error metadata)
-          [ErrorText (:error metadata)])
+          [:div {:style {:paddingBottom "4px"}}
+           [ErrorText (:error metadata)]])
         (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
                                                      :swappable swappable
                                                      :path (conj path i)
@@ -232,22 +234,23 @@
                    :flex-flow "column"}}
      (when-not hide-header?
        [:div {:style {:display "flex"}}
-        [:div {:style {:flex "0 1 auto"}}
-         [ExpandButton {:expanded? expanded?
-                        :path path
-                        :emit-fn emit-fn}]]
-        [:div {:style {:flex "0 1 auto"}} [:span "#{"]
-         (str (count data) " items")
-         [:span "}"]]
         (when (:error metadata)
-          [:div {:style {:flex "0 0 auto"
+          [:div {:style {:margin-left "-1em"
                          :width "1em"
                          :height "1.2em"}}
-           [ErrorIcon]])])
+           [ErrorIcon]])
+        [ExpandButton {:expanded? expanded?
+                       :path path
+                       :emit-fn emit-fn}]
+        [:div {:style {:flex "0 1 auto"}}
+         [:span "#{"]
+         (str (count data) " items")
+         [:span "}"]]])
      (when expanded?
        [:div {:style {:flex "0 1 auto" :paddingLeft "20px"}}
         (when (:error metadata)
-          [ErrorText (:error metadata)])
+          [:div {:style {:paddingBottom "4px"}}
+           [ErrorText (:error metadata)]])
         (map-indexed (fn [i x] ^{:key i} [DataFrisk {:data x
                                                      :swappable swappable
                                                      :path (conj path i)
@@ -261,23 +264,23 @@
                    :flex-flow "column"}}
      (when-not hide-header?
        [:div {:style {:display "flex"}}
-        [:div {:style {:flex "0 1 auto"}}
-         [ExpandButton {:expanded? expanded?
-                        :path path
-                        :emit-fn emit-fn}]]
+        (when (:error metadata)
+          [:div {:style {:margin-left "-1em"
+                         :width "1em"
+                         :height "1.2em"}}
+           [ErrorIcon]])
+        [ExpandButton {:expanded? expanded?
+                       :path path
+                       :emit-fn emit-fn}]
         [:div {:style {:flex "0 1 auto"}}
          [:span (str "{")]
          [KeySet (keys data)]
-         [:span "}"]]
-        (when (:error metadata)
-          [:div {:style {:flex "0 0 auto"
-                         :width "1em"
-                         :height "1.2em"}}
-           [ErrorIcon]])])
+         [:span "}"]]])
      (when expanded?
        [:div {:style {:flex "0 1 auto" :paddingLeft "20px"}}
         (when (:error metadata)
-          [ErrorText (:error metadata)])
+          [:div {:style {:paddingBottom "4px"}}
+           [ErrorText (:error metadata)]])
         (->> data
              (sort-by (fn [[k _]] (str k)))
              (map-indexed (fn [i x] ^{:key i} [KeyValNode (assoc all :data x)])))])]))
