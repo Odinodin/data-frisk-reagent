@@ -95,7 +95,7 @@ This component shows spec error messages in a human friendly way.
                                            :person/age "Jane"})}]
 ```
 
-<img src="specview.png">
+<img src="specview.png" style="max-width: 400px;">
 
 ### SpecTitleView
 
@@ -108,7 +108,7 @@ This is a convencience component that adds a title above the SpecView.
                                           :person/age "Jane"})}]
 ```
 
-<img src="spectitleview.png">
+<img src="spectitleview.png" style="max-width: 400px;">
 
 You can also override the title. 
 
