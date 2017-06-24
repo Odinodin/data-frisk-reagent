@@ -74,13 +74,91 @@ This component lets you dig in to any data structure. Here's an example of its u
     (js/document.getElementById "app")))
 ```
 
+### SpecView
+This component shows spec error messages in a human friendly way.
+
+```clojure
+(s/def :person/name string?)
+(s/def :person/age number?)
+(s/def :person/address string?)
+
+(s/def :person/person (s/keys :req [:person/name
+                                    :person/age
+                                    :person/address]))
+
+(s/def :app/persons (s/coll-of :person/person))
+
+;; Render
+[SpecView
+  {:errors (s/explain-data :person/person {:likes 2
+                                           :person/name 1
+                                           :person/age "Jane"})}]
+```
+
+<img src="specview.png">
+
+### SpecTitleView
+
+This is a convencience component that adds a title above the SpecView.
+
+```clojure
+[SpecTitleView
+ {:errors (s/explain-data :person/person {:likes 2
+                                          :person/name 1
+                                          :person/age "Jane"})}]
+```
+
+<img src="spectitleview.png">
+
+You can also override the title. 
+
+```clojure
+[SpecTitleView
+ {:title {:style {:font-weight "700" :color "red"}
+              :text "What ever you want"}
+  :errors (s/explain-data :person/person {:likes 2
+                                          :person/name 1
+                                          :person/age "Jane"})}]
+
+```
+
+#### Parsing exceptions thrown when instrument is enabled
+
+Here is an example of how you can render spec errors that are 
+thrown when spec instrumentation finds an error.
+
+```clojure
+
+;; Instrumentation is enabled
+(cljs.spec.test.alpha/instrument)
+
+(def state (atom {}))
+
+(try
+  (do-stuff)
+  (catch js/Error e
+    ;; Hack to get the name of the fdef'ed var from message, see why https://dev.clojure.org/jira/browse/CLJ-2166
+    (when (:cljs.spec.alpha/problems (ex-data e))
+      (swap! state assoc :current-error {:errors (ex-data e)
+                                         :title {:text (second (re-find #"Call\sto\s#'(.*)\sdid"
+                                                                        (aget e "message")))}}))
+      nil))
+      
+      
+;;;; In your render code
+
+(defn my-exception-view-comp [state]
+  [SpecTitleView (:current-error state)]) 
+ 
+```
+
 ### Re-frame
 
 See the [re-frisk](https://github.com/flexsurfer/re-frisk) project.
 
 ### For more
 
-See the dev/demo.cljs namespace for example use.
+See the dev/demo.cljs namespace for example use. There are also devcards that you can look at.
 
 ## License
 
