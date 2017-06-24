@@ -2,7 +2,7 @@
   (:require [devcards.core]
             [cljs.spec.alpha :as s]
             [reagent.core :as r]
-            [datafrisk.spec :refer [SpecView]])
+            [datafrisk.spec :refer [SpecView SpecTitleView]])
   (:require-macros [devcards.core :as dc :refer [defcard-rg]]))
 
 (s/def :person/name string?)
@@ -15,26 +15,32 @@
 
 (s/def :app/persons (s/coll-of :person/person))
 
-(defcard-rg bad-map
+(defcard-rg spec-view
   [SpecView
    {:errors (s/explain-data :person/person {:likes 2
                                             :person/name 1
                                             :person/age "Jane"})}])
 
+(defcard-rg spec-title-view
+  [SpecTitleView
+   {:errors (s/explain-data :person/person {:likes 2
+                                            :person/name 1
+                                            :person/age "Jane"})}])
+
 (defcard-rg bad-vec
-  [SpecView
+  [SpecTitleView
    {:errors (s/explain-data :app/persons [1 2 3 [4 5]])}])
 
 (defcard-rg bad-list
-  [SpecView
+  [SpecTitleView
    {:errors (s/explain-data :app/persons '(1 2 3 (4 5 )))}])
 
 (defcard-rg bad-set
-  [SpecView
+  [SpecTitleView
    {:errors (s/explain-data :app/persons #{1 2 #{3 4} 5})}])
 
 (defcard-rg bad-nested-map
-  [SpecView
+  [SpecTitleView
    {:errors (s/explain-data :app/persons [{:likes 2
                                            :person/name 1
                                            :person/age "Jane"}
@@ -43,5 +49,11 @@
                                            :person/age "Jenna"}])}])
 
 (defcard-rg bad-string
-  [SpecView
+  [SpecTitleView
    {:errors (s/explain-data :app/persons "some string")}])
+
+(defcard-rg override-spec-title
+  [SpecTitleView
+   {:title {:style {:font-weight "700" :color "red"}
+            :text "What ever you want"}
+    :errors (s/explain-data :app/persons "some string")}])
