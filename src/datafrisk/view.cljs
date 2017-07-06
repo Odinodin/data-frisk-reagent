@@ -1,5 +1,6 @@
 (ns datafrisk.view
-  (:require [reagent.core :as r]
+  (:require [cljs.pprint :refer [pprint]]
+            [reagent.core :as r]
             [datafrisk.util :as u]))
 
 (declare DataFrisk)
@@ -326,7 +327,7 @@
       expanded-paths)))
 
 (defn copy-to-clipboard [data]
-  (let [pretty (with-out-str (cljs.pprint/pprint data))
+  (let [pretty (with-out-str (pprint data))
         textArea (.createElement js/document "textarea")]
     (doto textArea
       ;; Put in top left corner of screen
