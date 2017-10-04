@@ -99,7 +99,7 @@ This component shows spec error messages in a human friendly way.
 
 ### SpecTitleView
 
-This is a convencience component that adds a title above the SpecView.
+This is a convenience component that adds a title above the SpecView.
 
 ```clojure
 [SpecTitleView
