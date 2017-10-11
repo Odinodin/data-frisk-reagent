@@ -41,5 +41,11 @@
                                          :source-paths ["src" "test"]
                                          :compiler {:output-to "resources/public/js/compiled/test.js"
                                                     :main datafrisk.test-runner
-                                                    :optimizations :none}}]}}}
+                                                    :optimizations :none}}
+                                        {:id "demo-site"
+                                         :source-paths ["src" "dev"]
+                                         :compiler {:main "datafrisk.demo"
+                                                    :optimizations :advanced
+                                                    :output-to "demo-site/main.js"
+                                                    :output-dir "demo-site/out"}}]}}}
   :clean-targets ^{:protect false} ["resources/public/js" "target"])
