@@ -4,9 +4,9 @@
   :license {:name "MIT"
             :url "https://opensource.org/licenses/MIT"}
   :min-lein-version "2.7.1"
-  :dependencies [[reagent "0.6.1"]]
-  :plugins [[lein-figwheel "0.5.10"]
-            [lein-doo "0.1.7"]
+  :dependencies [[reagent "0.7.0"]]
+  :plugins [[lein-figwheel "0.5.14"]
+            [lein-doo "0.1.8"]
             [lein-cljsbuild "1.1.3" :exclusions [[org.clojure/clojure]]]]
   :source-paths ["src"]
 
@@ -16,11 +16,11 @@
   :aliases {"testing" ["do" ["clean"] ["doo" "phantom" "test" "once"]]}
 
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.9.0-alpha17"]
-                                  [org.clojure/clojurescript "1.9.562"]
-                                  [doo "0.1.7"]
-                                  [com.cemerick/piggieback "0.2.1"]
-                                  [figwheel-sidecar "0.5.10"]
-                                  [devcards "0.2.3" :exclusions [[cljsjs/react]]]]
+                                  [org.clojure/clojurescript "1.9.946"]
+                                  [doo "0.1.8"]
+                                  [com.cemerick/piggieback "0.2.2"]
+                                  [figwheel-sidecar "0.5.14"]
+                                  [devcards "0.2.4" :exclusions [[cljsjs/react]]]]
                    :source-paths ["src" "devcards"]
                    :resource-paths ["devresources"]
                    :cljsbuild {:builds [{:id "dev"
