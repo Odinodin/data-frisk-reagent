@@ -7,7 +7,7 @@
   :dependencies [[reagent "0.7.0"]]
   :plugins [[lein-figwheel "0.5.14"]
             [lein-doo "0.1.8"]
-            [lein-cljsbuild "1.1.3" :exclusions [[org.clojure/clojure]]]]
+            [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
   :source-paths ["src"]
 
   :figwheel {:http-server-root "public"
@@ -15,7 +15,7 @@
 
   :aliases {"testing" ["do" ["clean"] ["doo" "phantom" "test" "once"]]}
 
-  :profiles {:dev {:dependencies [[org.clojure/clojure "1.9.0-alpha17"]
+  :profiles {:dev {:dependencies [[org.clojure/clojure "1.9.0-beta2"]
                                   [org.clojure/clojurescript "1.9.946"]
                                   [doo "0.1.8"]
                                   [com.cemerick/piggieback "0.2.2"]
